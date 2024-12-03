@@ -1,5 +1,5 @@
 {
-  "name": "smart-search",
+  "name": "smart-docs-search",
   "version": "1.0.0",
   "description": "A flexible search plugin for documentation sites with API and database support",
   "main": "dist/index.js",
