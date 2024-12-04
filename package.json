@@ -1,6 +1,6 @@
 {
   "name": "docs-search-plugin",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "A flexible search plugin for documentation sites supporting both API and database-driven search",
   "main": "dist/index.js",
   "types": "types/index.d.ts",
