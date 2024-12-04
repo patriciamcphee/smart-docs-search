@@ -1,8 +1,9 @@
 {
-  "name": "docs-search-plugin",
-  "version": "0.0.1",
+  "name": "smart-search-plugin",
+  "version": "0.0.2",
   "description": "A flexible search plugin for documentation sites supporting both API and database-driven search",
-  "main": "dist/index.js",
+  "main": "src/client/components/index.js",
+  "module": "src/client/components/index.js",
   "types": "types/index.d.ts",
   "scripts": {
     "build": "rollup -c",
