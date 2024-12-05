@@ -21,9 +21,10 @@ A sophisticated search plugin for Docusaurus 2.x that provides powerful search c
 
 ```bash
 npm install smart-search-plugin
-# or
-yarn add smart-search-plugin
+```
 
+```bash
+yarn add smart-search-plugin
 ```
 
 ## Configuration
@@ -126,8 +127,8 @@ Content automatically excluded from search:
 
 The plugin creates two search index files:
 
-- `/static/searchIndex.json`: Public search index
-- `/.docusaurus/searchIndex.json`: Development index
+- `/build/searchIndex.json`: Public search index
+- `/static/searchIndex.json`: Development index
 
 ## User interface
 
