@@ -1,0 +1,124 @@
+.searchContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  z-index: var(--ifm-z-index-fixed);
+}
+
+.searchWrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.searchIcon {
+  font-size: 20px;
+  color: var(--ifm-navbar-link-color);
+  cursor: pointer;
+  padding: 8px;
+  z-index: 2;
+  user-select: none;
+}
+
+.searchInput {
+  position: absolute;
+  right: 100%;
+  width: 0;
+  opacity: 0;
+  transition: all 0.3s ease;
+  background: var(--ifm-background-surface-color);
+  border-radius: 12px;
+  border: 0.5px solid #ccc; /* Border style */
+  color: var(--ifm-font-color-base);
+  height: 40px; /* Standard height */
+  font-size: 16px;
+  padding: 8px 12px; /* Vertical and horizontal padding */
+  box-sizing: border-box; /* Ensures padding is included in the total height */
+}
+
+.searchWrapper.expanded .searchInput {
+  width: 300px;
+  opacity: 1;
+  padding-right: 32px;
+}
+
+.searchInput.visible {
+  width: 300px;
+  opacity: 1;
+}
+
+.dropdownResults {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 400px;
+  max-height: 70vh;
+  overflow-y: auto;
+  background-color: var(--ifm-background-surface-color);
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  margin-top: 8px;
+  backdrop-filter: blur(8px);
+}
+
+.resultCount {
+  padding: 8px 16px;
+  background-color: var(--ifm-background-surface-color);
+  border-bottom: 1px solid var(--ifm-color-emphasis-300);
+  font-size: 0.875rem;
+  color: var(--ifm-color-emphasis-700);
+  font-weight: 500;
+}
+
+.resultItem {
+  padding: 12px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  transition: background-color 0.2s ease;
+  background-color: var(--ifm-background-surface-color);
+}
+
+.resultItem:hover {
+  background-color: var(--ifm-color-emphasis-100);
+}
+
+.resultTitle {
+  color: var(--ifm-color-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.resultDescription {
+  font-size: 0.875rem;
+  color: var(--ifm-font-color-base);
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.resultMeta {
+  font-size: 0.75rem;
+  color: var(--ifm-color-emphasis-600);
+}
+
+/* Dark mode adjustments */
+[data-theme='dark'] .searchInput {
+  background-color: var(--ifm-background-surface-color);
+  color: var(--ifm-font-color-base);
+}
+
+[data-theme='dark'] .dropdownResults {
+  background-color: var(--ifm-background-surface-color);
+  border-color: var(--ifm-color-emphasis-300);
+}
+
+[data-theme='dark'] .resultItem {
+  background-color: var(--ifm-background-surface-color);
+}
+
+[data-theme='dark'] .resultDescription {
+  color: var(--ifm-font-color-base);
+}

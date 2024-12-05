@@ -1,41 +1,48 @@
 {
-  "name": "docs-search-plugin",
-  "version": "1.0.0",
-  "description": "A flexible search plugin for documentation sites supporting both API and database-driven search",
-  "main": "dist/index.js",
-  "types": "types/index.d.ts",
-  "scripts": {
-    "build": "rollup -c",
-    "build:index": "node src/server/indexer/generateIndex.js",
-    "dev": "rollup -c -w",
-    "test": "jest"
+  "name": "smart-search-plugin",
+  "version": "0.0.3",
+  "description": "A modern search plugin for Docusaurus 2.x and 3.x that provides enhanced search functionality with a clean, user-friendly interface. The plugin automatically indexes your documentation content, respecting exclusion rules and special cases.",
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "require": "./lib/index.js"
+    },
+    "./theme/*": {
+      "require": "./lib/theme/*"
+    }
   },
-  "peerDependencies": {
-    "react": ">=16.8.0",
-    "react-dom": ">=16.8.0"
+  "files": [
+    "lib",
+    "src"
+  ],
+  "scripts": {
+    "swizzle": "docusaurus swizzle",
+    "clean": "node -e \"if (require('fs').existsSync('lib')) require('fs').rmSync('lib', { recursive: true })\"",
+    "build": "npm run clean && npx babel src -d lib && npm run copy-styles",
+    "copy-styles": "node -e \"require('fs-extra').copySync('src/theme/SearchBar/styles.module.css', 'lib/theme/SearchBar/styles.module.css')\"",
+    "prepare": "npm run build",
+    "watch": "npx babel src -d lib --watch"
   },
   "dependencies": {
-    "fuse.js": "^6.6.2",
+    "lunr": "^2.3.9",
+    "antd": "^4.24.0",
+    "lodash": "^4.17.21",
     "gray-matter": "^4.0.3",
-    "mongodb": "^5.0.0",
-    "express": "^4.18.2"
+    "@ant-design/icons": "^4.8.0",
+    "fs-extra": "^11.1.0"
+  },
+  "peerDependencies": {
+    "@docusaurus/core": "^2.0.0 || ^3.0.0",
+    "@docusaurus/theme-common": "^2.0.0 || ^3.0.0",
+    "@docusaurus/theme-classic": "^2.0.0 || ^3.0.0",
+    "react": "^16.8.0 || ^17.0.0 || ^18.0.0",
+    "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^24.0.0",
-    "@rollup/plugin-node-resolve": "^15.0.0",
-    "@rollup/plugin-typescript": "^11.0.0",
-    "@types/react": "^18.0.0",
-    "rollup": "^3.20.0",
-    "typescript": "^5.0.0",
-    "jest": "^29.0.0"
-  },
-  "keywords": [
-    "documentation",
-    "search",
-    "docusaurus",
-    "nextra",
-    "mdx"
-  ],
-  "author": "Patricia McPhee",
-  "license": "MIT"
+    "@babel/cli": "^7.23.4",
+    "@babel/core": "^7.23.4",
+    "@babel/preset-env": "^7.23.4",
+    "@babel/preset-react": "^7.23.4",
+    "@docusaurus/module-type-aliases": "^2.0.0 || ^3.0.0"
+  }
 }
