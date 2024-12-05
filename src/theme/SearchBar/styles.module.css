@@ -1,0 +1,112 @@
+/* src/components/Search/styles.module.css */
+.searchContainer {
+  position: relative;
+  margin-left: 1rem;
+}
+
+.searchWrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.searchIcon {
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0.5rem;
+  color: var(--ifm-navbar-link-color);
+}
+
+.searchInput {
+  width: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  transition: all 0.3s ease;
+  opacity: 0;
+  position: absolute;
+  right: 100%;
+}
+
+.searchInput.visible {
+  width: 200px;
+  padding: 4px 8px;
+  opacity: 1;
+  background: var(--ifm-background-color);
+  border: 1px solid var(--ifm-color-primary);
+  border-radius: 4px;
+}
+
+.dropdownResults {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 300px;
+  max-height: 400px;
+  overflow-y: auto;
+  background: var(--ifm-background-color);
+  border: 1px solid var(--ifm-color-primary);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  margin-top: 0.5rem;
+}
+
+.resultCount {
+  padding: 8px 12px;
+  color: var(--ifm-color-emphasis-600);
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  font-size: 0.9rem;
+}
+
+.resultItem {
+  padding: 12px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.resultItem:last-child {
+  border-bottom: none;
+}
+
+.resultItem:hover {
+  background: var(--ifm-hover-overlay);
+}
+
+.resultTitle {
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--ifm-color-primary);
+}
+
+.resultDescription {
+  font-size: 0.9rem;
+  color: var(--ifm-color-emphasis-700);
+  margin-bottom: 4px;
+}
+
+.resultMeta {
+  font-size: 0.8rem;
+  color: var(--ifm-color-emphasis-600);
+}
+
+.loadingDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--ifm-color-primary);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.3; }
+  50% { opacity: 1; }
+  100% { opacity: 0.3; }
+}
+
+.expanded .searchInput {
+  width: 200px;
+  padding: 4px 8px;
+  opacity: 1;
+}
