@@ -1,138 +1,221 @@
+# Smart Search Plugin for Docusaurus
 
-# docusaurus-lunr-search
-Offline Search for Docusaurus V2 or V3
+A sophisticated search plugin for Docusaurus 2.x that provides powerful search capabilities with an elegant, accessible interface. This plugin seamlessly integrates with your Docusaurus documentation, offering real-time search functionality while respecting your site's theme and configuration.
 
-[Demo Website](https://praveenn77.github.io/docusaurus-lunr-search-demo/)
+> Support for Docusaurus 3.x is a work in progress.  Stay tuned!
 
- [![MIT Licence](https://img.shields.io/github/license/lelouch77/docusaurus-lunr-search)](#)
+## Key features
 
-[![npm version](https://badge.fury.io/js/docusaurus-lunr-search.svg)](https://www.npmjs.com/package/docusaurus-lunr-search)
+- 🚀 **High-Performance Search**: Client-side search powered by Lunr.js for instant results
+- 🎨 **Elegant UI**: Modern interface built with Ant Design, featuring an expandable search bar
+- 🌓 **Theme Integration**: Seamless support for Docusaurus light/dark modes and custom themes
+- ⚡️ **Real-time Search**: Instant search-as-you-type with highlighted results
+- 📱 **Responsive Design**: Optimized for all screen sizes with a mobile-friendly interface
+- 🔍 **Smart Indexing**: Efficient content indexing with file change detection and caching
+- 🎯 **Rich Metadata**: Support for frontmatter fields including keywords and update tracking
+- 🚫 **Content Control**: Flexible content exclusion with folder and draft support
+- ♿️ **Accessibility**: Full keyboard navigation and ARIA support
+- 💨 **Performance Optimized**: File caching and incremental builds for faster development
 
-## Sample
-<p align="center">
-<img width="548" alt="image" src="https://github.com/praveenn77/docusaurus-lunr-search/assets/20218070/dbc54b61-077f-4e11-af27-8798cae8a572.gif">
-</p>
+## Installation
 
+```bash
+npm install smart-search-plugin
+# or
+yarn add smart-search-plugin
 
-## Prerequisites
-- Docusaurus V2 or V3
-- Node.js >= 12.X
-
-## How to Use ?
-1. Install this package
-```
-yarn add docusaurus-lunr-search
-```
-or
-```
-npm i docusaurus-lunr-search  --save
-```
-If npm install fails to install with error `unable to resolve dependency tree`, run `npm i --legacy-peer-deps`
-
-2. Some time npm fails to install `lunr` package, in that case install `lunr` package manually
-```
-npm i lunr --save
 ```
 
-3. Add the docusaurus-lunr-search plugin to your `docusaurus.config.js`
-```
+## Configuration
+
+Add the plugin to your `docusaurus.config.js`:
+
+```jsx
 module.exports = {
-  // ...
-    plugins: [require.resolve('docusaurus-lunr-search')],
-}
+  staticDirectories: ['static'], // Required for search index
+
+  plugins: [
+    path.resolve(__dirname, 'node_modules/smart-search-plugin')
+  ],
+
+  presets: [
+    [
+      '@docusaurus/preset-classic',
+      {
+        docs: {
+          routeBasePath: '/',
+          path: 'docs',
+          showLastUpdateTime: true, // Enables last update display
+        },
+      },
+    ],
+  ],
+
+  themeConfig: {
+    colorMode: {
+      defaultMode: 'dark',
+      respectPrefersColorScheme: true,
+    },
+    navbar: {
+      items: [
+        {
+          type: 'search',
+          position: 'right',
+        },
+      ],
+    },
+  },
+};
+
 ```
 
-4. Then build your Docusaurus project
-```
-yarn build
-```
-or
-```
-npm run build
-```
+## Document structure
 
-5. Serve your application
+### Required directory structure
+
 ```
-yarn serve
-```
-or
-```
-npm run serve 
+your-docusaurus-site/
+├── docs/                   # Documentation root
+│   ├── intro.md           # Documentation files
+│   └── advanced/
+│       └── config.md
+├── static/                 # Static assets directory
+└── docusaurus.config.js    # Configuration file
+
 ```
 
-Note: Docusaurus search information can only be generated from a production build. Local development is currently not supported.
+### Frontmatter configuration
 
-## Using an option (eg. `languages`) in the plugin
-```
-module.exports = {
-  // ...
-    plugins: [[ require.resolve('docusaurus-lunr-search'), {
-      languages: ['en', 'de'] // language codes
-    }]],
-}
-```
-Supports all the language listed here https://github.com/MihaiValentin/lunr-languages
+Your markdown files can include these frontmatter fields for enhanced search functionality:
 
-## Options available
+```markdown
+---
+title: Document Title
+description: A brief description that appears in search results
+keywords: [search, docusaurus, plugin]
+draft: false                # Exclude from search when true
+last_update:               # Optional update tracking
+  date: 2024-03-20
+  author: John Doe
+---
 
-| Option              | Type      | Default  | Description                                                                                                               |
-| ------------------- | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `languages`         | `Array`   | `['en']` | Language codes to use for stemming, Supports all the language listed here https://github.com/MihaiValentin/lunr-languages |
-| `indexBaseUrl`      | `Boolean` | `false`  | Base url will not indexed by default, if you want to index the base url set this option to `true`                         |
-| `excludeRoutes`     | `Array`   | `[]`     | Exclude certain routes from the search                                                                                    |
-| `includeRoutes`     | `Array`   | `[]`     | Include only specific routes for search                                                                                   |
-| `stopWords`         | `Array`   | `[]`     | Add stop words(words that are exclude from search result) to the search index                                             |
-| `excludeTags`       | `Array`   | `[]`     | Exclude certain tags from the search      
-| `highlightResult`   | `Boolean` | `false`  | Enable it to highlight the searched word in the result page. Used `mark.js` for highlighting. <br /> You can customize the highlight color using css <br /> ``` mark  { background-color: red !important; color: green !important }```                                                                                |
-| `disableVersioning` | `Boolean` | `false`  | Docs versions are displayed by default. If you want to hide it, set this plugin option to `true`                          |
-| `assetUrl`     | `string`   | `\`     | Url from which the generated search doc files to be loaded, check [issue #122](https://github.com/praveenn77/docusaurus-lunr-search/issues/122) |
-| `maxHits`           | `string`  | `5`      | Maximum number of hits shown |
-| `fields`            | `object`  | `{}`      | Lunr field definitions, allows "boosting" priority for different sources of keywords (e.g. title, content, keywords) |
-
-### Options to configure Lunr fields
-The `fields` config property is passed into Lunr directly as [field attributes](https://lunrjs.com/docs/lunr.Builder.html#field), and can be used to configure the relative priority of different field types (e.g. title, content, keywords). 
-
-docusaurus-lunr-search sets the default value for fields to:
-
-```javascript
-{ 
-  title: { boost: 200 },
-  content: { boost: 2 },
-  keywords: { boost: 100 }
-}
 ```
 
-## Indexing non-direct children headings of `.markdown`
-By default, this library will only search for headings that are
-**direct children** of the `.markdown` element. 
+## Content processing
 
-If you would like to render content inside the `.markdown` element on
-a swizzled DocItem component, and want this library to **index the
-headings inside those custom elements even if they are not direct
-children of the `.markdown` element**, then add the attribute
-`data-search-children` to a parent element of the headings you want to
-index.
+### Smart content indexing
 
-The `data-search-children` attribute will cause this library to look
-for all headings inside that element, including both direct and
-indirect children (E.g. 'grandchildren' nodes).
+The plugin processes your content with these features:
 
-Check this [issue #115](https://github.com/praveenn77/docusaurus-lunr-search/issues/115) for more details.
+1. **Intelligent caching**
+    - File-based caching system for faster builds
+    - Automatic detection of content changes
+    - Incremental rebuilding for modified files only
+2. **Content normalization**
+    - Consistent URL generation across platforms
+    - Special handling for index files
+    - Clean URL paths for improved SEO
+3. **Automatic exclusions**
+Content automatically excluded from search:
+    - Root/welcome page (URL: '/')
+    - Draft documents
+    - Content in excluded folders (default: 'contributor-guide')
+    - Files with `draft: true` in frontmatter
 
-## Upgrading from docusaurus V2 to V3
-Update the `docusaurus-lunr-search` version to `3.3.0` or higher in `package.json` file
+### Search index generation
 
-Remove `src/theme/SearchBar` folder if you swizzled it before, if the folder does not exist then ignore this step.
+The plugin creates two search index files:
 
-Do `yarn install` or `npm install` 
+- `/static/searchIndex.json`: Public search index
+- `/.docusaurus/searchIndex.json`: Development index
 
-If npm install fails to install with error `unable to resolve dependency tree`, run `npm i --legacy-peer-deps`
+## User interface
+
+### Search component features
+
+The search interface provides:
+
+- Expandable search input
+- Real-time results dropdown
+- Keyboard navigation support
+- Result highlighting
+- Last update information display
+- Mobile-friendly design
+
+### Keyboard shortcuts
+
+- `Enter`: Navigate to first result
+- `Escape`: Close search dropdown
+- `Tab`: Navigate through results
+- `Arrow Up/Down`: Navigate results (coming soon)
+
+### Styling customization
+
+Override default styles by creating a custom CSS module with these classes:
+
+```css
+.searchContainer    /* Main container */
+.searchWrapper     /* Input container */
+.searchIcon        /* Search icon */
+.searchInput       /* Search input */
+.dropdownResults   /* Results dropdown */
+.resultItem        /* Individual result */
+.resultTitle      /* Result title */
+.resultMeta       /* Update information */
+
+```
+
+## Technical details
+
+### Project architecture
+
+```
+smart-search-plugin/
+├── src/
+│   ├── index.js           # Plugin core
+│   └── theme/
+│       ├── index.js       # Theme exports
+│       ├── Layout.js      # Layout integration
+│       ├── Root.js        # Root component
+│       └── SearchBar/
+│           ├── Search.js  # Search component
+│           └── styles.module.css
+└── lib/                   # Compiled output
+
+```
+
+### Dependencies
+
+The plugin uses these key dependencies:
+
+- `lunr`: Search implementation
+- `antd`: UI components
+- `gray-matter`: Frontmatter parsing
+- `@ant-design/icons`: UI icons
+
+### Browser support
+
+- Modern browsers (Chrome, Firefox, Safari, Edge)
+- IE11 not supported
+
+## Contributing
+
+We welcome contributions! Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License
+
+MIT
 
 ## Credits
 
-Thanks to [`algolia/docsearch.js`](https://github.com/algolia/docsearch), I modified it to create this search component 
+Built with:
 
-And thanks [cmfcmf](https://github.com/cmfcmf), I used the code from his library [docusaurus-search-local](https://github.com/cmfcmf/docusaurus-search-local) for multi-language support.
-
-## Changelog
-Checkout the [releases](https://github.com/lelouch77/docusaurus-lunr-search/releases) page for changelog. 
+- [Docusaurus](https://docusaurus.io/)
+- [Ant Design](https://ant.design/)
+- [Lunr.js](https://lunrjs.com/)
