@@ -32,7 +32,8 @@ yarn add smart-search-plugin
 Add the plugin to your `docusaurus.config.js`:
 
 ```jsx
-module.exports = {
+const path = require('path');
+
   staticDirectories: ['static'], // Required for search index
 
   plugins: [
@@ -44,8 +45,8 @@ module.exports = {
       '@docusaurus/preset-classic',
       {
         docs: {
-          routeBasePath: '/',
-          path: 'docs',
+          routeBasePath: '/',  // Required
+          path: 'docs', // Required for the correct linking of topics
           showLastUpdateTime: true, // Enables last update display
         },
       },
@@ -53,11 +54,7 @@ module.exports = {
   ],
 
   themeConfig: {
-    colorMode: {
-      defaultMode: 'dark',
-      respectPrefersColorScheme: true,
-    },
-    navbar: {
+       navbar: {
       items: [
         {
           type: 'search',
