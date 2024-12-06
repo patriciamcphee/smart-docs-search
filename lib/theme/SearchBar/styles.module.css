@@ -31,7 +31,7 @@
   border-radius: 12px;
   border: 0.5px solid #ccc; /* Border style */
   color: var(--ifm-font-color-base);
-  height: 40px; /* Standard height */
+  height: 36px; 
   font-size: 16px;
   padding: 8px 12px; /* Vertical and horizontal padding */
   box-sizing: border-box; /* Ensures padding is included in the total height */
