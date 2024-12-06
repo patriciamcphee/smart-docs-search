@@ -1,1 +1,10 @@
-__tests__
+# .npmignore
+src/
+tests/
+.babel*
+.git*
+.prettier*
+.eslint*
+*.test.js
+coverage/
+docs/

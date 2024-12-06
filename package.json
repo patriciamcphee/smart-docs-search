@@ -1,7 +1,27 @@
 {
   "name": "smart-search-plugin",
-  "version": "0.0.3",
+  "version": "1.0.0",
   "description": "A modern search plugin for Docusaurus 2.x and 3.x that provides enhanced search functionality with a clean, user-friendly interface. The plugin automatically indexes your documentation content, respecting exclusion rules and special cases.",
+  "author": "Patricia McPhee <hi@patriciamcphee.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/patriciamcphee/smart-docs-search.git"
+  },
+  "bugs": {
+    "url": "https://github.com/patriciamcphee/smart-docs-search/issues"
+  },
+  "homepage": "https://github.com/patriciamcphee/smart-docs-search#readme",
+  "keywords": [
+    "docusaurus",
+    "docusaurus-plugin",
+    "search",
+    "documentation",
+    "react",
+    "local search",
+    "dev environment search",
+    "fuzzy search"
+  ],
   "main": "lib/index.js",
   "exports": {
     ".": {
@@ -12,8 +32,10 @@
     }
   },
   "files": [
-    "lib",
-    "src"
+    "lib/",
+    "src/",
+    "LICENSE",
+    "README.md"
   ],
   "scripts": {
     "swizzle": "docusaurus swizzle",
@@ -21,20 +43,26 @@
     "build": "npm run clean && npx babel src -d lib && npm run copy-styles",
     "copy-styles": "node -e \"require('fs-extra').copySync('src/theme/SearchBar/styles.module.css', 'lib/theme/SearchBar/styles.module.css')\"",
     "prepare": "npm run build",
-    "watch": "npx babel src -d lib --watch"
+    "watch": "npx babel src -d lib --watch",
+    "prepublishOnly": "npm run build",
+    "version": "git add -A src",
+    "postversion": "git push && git push --tags",
+    "test": "echo \"No tests specified yet\" && exit 0",
+    "lint": "eslint src/"
   },
   "dependencies": {
-    "lunr": "^2.3.9",
-    "antd": "^4.24.0",
-    "lodash": "^4.17.21",
-    "gray-matter": "^4.0.3",
     "@ant-design/icons": "^4.8.0",
-    "fs-extra": "^11.1.0"
+    "antd": "^4.24.0",
+    "fs-extra": "^11.1.0",
+    "fuse.js": "^6.6.2",
+    "gray-matter": "^4.0.3",
+    "lodash": "^4.17.21",
+    "lunr": "^2.3.9"
   },
   "peerDependencies": {
     "@docusaurus/core": "^2.0.0 || ^3.0.0",
-    "@docusaurus/theme-common": "^2.0.0 || ^3.0.0",
     "@docusaurus/theme-classic": "^2.0.0 || ^3.0.0",
+    "@docusaurus/theme-common": "^2.0.0 || ^3.0.0",
     "react": "^16.8.0 || ^17.0.0 || ^18.0.0",
     "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0"
   },
@@ -43,6 +71,15 @@
     "@babel/core": "^7.23.4",
     "@babel/preset-env": "^7.23.4",
     "@babel/preset-react": "^7.23.4",
-    "@docusaurus/module-type-aliases": "^2.0.0 || ^3.0.0"
+    "@docusaurus/module-type-aliases": "^2.0.0 || ^3.0.0",
+    "eslint": "^8.55.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
