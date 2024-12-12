@@ -1,0 +1,32 @@
+name: 🛠️ Troubleshooting Tips
+description: Add troubleshooting tips for common issues
+body:
+  - type: checkboxes
+    attributes:
+      label: Is there an existing issue for this?
+      description: Please search to see if an issue already exists
+      options:
+        - label: I have searched existing issues, but it hasn't been reported yet
+          required: true
+  - type: input
+    attributes:
+      label: Webex conversation link (if any)
+      description: Provide the link to the Webex conversation if available
+  - type: input
+    attributes:
+      label: Choose a title
+      description: Name it after the problem you're trying to solve, using the terms users will likely type into the search.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Symptom
+      description: Describe the problem and symptom as other people would experience it.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Solution
+      description: Describe the possible causes and how to fix it. Add screenshots, illustrations as necessary.
+    validations:
+      required: true
