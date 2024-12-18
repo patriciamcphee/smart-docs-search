@@ -1,21 +1,22 @@
 # Smart Search Plugin for Docusaurus
 
-A sophisticated search plugin for Docusaurus 2.x that provides powerful search capabilities with an elegant, accessible interface. This plugin seamlessly integrates with your Docusaurus documentation, offering real-time search functionality while respecting your site's theme and configuration.
+A metadata-driven search plugin for Docusaurus 2.x that provides targeted, efficient search capabilities with an elegant, accessible interface. By leveraging metadata keywords, this plugin delivers precise search results while working seamlessly offline and in firewall-restricted environments.
 
-> Support for Docusaurus 3.x is a work in progress.  Stay tuned!
+👉 [Try the live demo](https://smart-search-plugin-demo.vercel.app/) | 📝 [Read the full blog post](https://www.patriciamcphee.com/blog/2024/11/08/enhancing-search-functionality/)
 
-## Key features
+> Support for Docusaurus 3.x is a work in progress. Stay tuned!
 
-- 🚀 **High-Performance Search**: Client-side search powered by Lunr.js for instant results
-- 🎨 **Elegant UI**: Modern interface built with Ant Design, featuring an expandable search bar
-- 🌓 **Theme Integration**: Seamless support for Docusaurus light/dark modes and custom themes
-- ⚡️ **Real-time Search**: Instant search-as-you-type with highlighted results
-- 📱 **Responsive Design**: Optimized for all screen sizes with a mobile-friendly interface
-- 🔍 **Smart Indexing**: Efficient content indexing with file change detection and caching
-- 🎯 **Rich Metadata**: Support for frontmatter fields including keywords and update tracking
-- 🚫 **Content Control**: Flexible content exclusion with folder and draft support
-- ♿️ **Accessibility**: Full keyboard navigation and ARIA support
-- 💨 **Performance Optimized**: File caching and incremental builds for faster development
+## Why Smart Search?
+
+The Smart Search Plugin reintroduces the proven concept of metadata keywords for documentation search:
+
+- 🎯 **Targeted Results**: Only content tagged with relevant metadata appears
+- 🔍 **Precise Matching**: Avoids information overload from full-text indexing
+- 🏃‍♀️ **Offline Operation**: Works behind firewalls without external API dependencies
+- ⚡️ **Local Testing**: Test search functionality during development
+- 📱 **Modern Interface**: Responsive design with full keyboard navigation
+
+
 
 ## Installation
 
@@ -139,6 +140,20 @@ The search interface provides:
 - Result highlighting
 - Last update information display
 - Mobile-friendly design
+
+### Search Implementation
+
+Here's how the Smart Search Plugin appears in your Docusaurus navbar:
+
+1. **Inactive state**
+   
+   ![Image showing the search bar in its inactive state](https://github.com/patriciamcphee/portfolio/blob/main/blog/images/search-icon-only.png?raw=true)
+
+2. **Activated state with results**
+
+   ![Image showing the expanded search bar when clicked](https://github.com/patriciamcphee/portfolio/blob/main/blog/images/search-results.png?raw=true)
+
+The search functionality seamlessly integrates with your Docusaurus theme while maintaining the metadata-driven approach.
 
 ### Keyboard shortcuts
 
