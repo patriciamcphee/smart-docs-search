@@ -1,7 +1,7 @@
 {
   "name": "smart-search-plugin",
-  "version": "1.0.2",
-  "description": "A modern search plugin for Docusaurus 2.x that provides enhanced search functionality with a clean, user-friendly interface. The plugin automatically indexes your documentation content, respecting exclusion rules and special cases.",
+  "version": "1.0.3",
+  "description": "A modern search plugin for Docusaurus 2.x that provides enhanced search functionality with a clean, user-friendly interface. The plugin automatically indexes your documentation content (without an API or Search-as-a-Service). It also respects exclusion rules and special cases.",
   "author": "Patricia McPhee <patti@pixlngrid.com>",
   "license": "MIT",
   "repository": {
