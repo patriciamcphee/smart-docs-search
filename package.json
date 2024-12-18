@@ -1,6 +1,6 @@
 {
   "name": "smart-search-plugin",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A modern search plugin for Docusaurus 2.x that provides enhanced search functionality with a clean, user-friendly interface. The plugin automatically indexes your documentation content (without an API or Search-as-a-Service). It also respects exclusion rules and special cases.",
   "author": "Patricia McPhee <patti@pixlngrid.com>",
   "license": "MIT",
@@ -60,9 +60,9 @@
     "lunr": "^2.3.9"
   },
   "peerDependencies": {
-    "@docusaurus/core": "^2.0.0 || ^3.0.0",
-    "@docusaurus/theme-classic": "^2.0.0 || ^3.0.0",
-    "@docusaurus/theme-common": "^2.0.0 || ^3.0.0",
+    "@docusaurus/core": "^2.0.0",
+    "@docusaurus/theme-classic": "^2.0.0",
+    "@docusaurus/theme-common": "^2.0.0",
     "react": "^16.8.0 || ^17.0.0 || ^18.0.0",
     "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0"
   },
@@ -71,7 +71,7 @@
     "@babel/core": "^7.23.4",
     "@babel/preset-env": "^7.23.4",
     "@babel/preset-react": "^7.23.4",
-    "@docusaurus/module-type-aliases": "^2.0.0 || ^3.0.0",
+    "@docusaurus/module-type-aliases": "^2.0.0",
     "eslint": "^8.55.0",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0"
