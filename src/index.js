@@ -2,6 +2,7 @@
 const path = require('path');
 const fs = require('fs');
 const matter = require('gray-matter');
+const { extractHeadingsWithContent } = require('./utils/headingUtils');
 
 module.exports = function smartSearchPlugin(context, options) {
   const searchIndexCache = new Map();
@@ -14,6 +15,11 @@ module.exports = function smartSearchPlugin(context, options) {
       const searchIndex = [];
       const excludedFolders = ['contributor-guide'];
 
+      function getFileHash(filePath) {
+        const stats = fs.statSync(filePath);
+        return `${stats.size}-${stats.mtime.getTime()}`;
+      }
+
       function shouldExcludeFolder(folderPath) {
         return excludedFolders.some(folder => 
           folderPath.includes(`${path.sep}${folder}`) || 
@@ -21,16 +27,8 @@ module.exports = function smartSearchPlugin(context, options) {
         );
       }
 
-      // Helper to get file hash for caching
-      function getFileHash(filePath) {
-        const stats = fs.statSync(filePath);
-        return `${stats.size}-${stats.mtime.getTime()}`;
-      }
-
       function processDirectory(dir) {
-        if (shouldExcludeFolder(dir)) {
-          return;
-        }
+        if (shouldExcludeFolder(dir)) return;
       
         const files = fs.readdirSync(dir);
         files.forEach(file => {
@@ -41,7 +39,7 @@ module.exports = function smartSearchPlugin(context, options) {
             processDirectory(filePath);
           } else if (file.endsWith('.md') || file.endsWith('.mdx')) {
             try {
-              // Check if file has been modified since last processing
+              // Check cache for unchanged files
               const fileHash = getFileHash(filePath);
               const cachedHash = searchIndexCache.get(filePath);
               
@@ -56,23 +54,21 @@ module.exports = function smartSearchPlugin(context, options) {
               const fileContent = fs.readFileSync(filePath, 'utf-8');
               const { data: frontMatter, content } = matter(fileContent);
               
-              if (frontMatter.draft === true) {
-                return;
-              }
+              // Skip draft documents
+              if (frontMatter.draft === true) return;
       
               const relativeFilePath = path.relative(docsDir, filePath);
-              const url = '/' + relativeFilePath.replace(/\.(md|mdx)$/, '')
-                                              .replace(/\\/g, '/')
-                                              .replace(/\/index$/, '')
-                                              .replace(/\/[^\/]+\/\1$/, '/$1');
+              const url = '/' + relativeFilePath
+                .replace(/\.(md|mdx)$/, '')
+                .replace(/\\/g, '/')
+                .replace(/\/index$/, '')
+                .replace(/\/[^\/]+\/\1$/, '/$1');
               
-              if (url === '/') {
-                return;
-              }
+              // Skip root page and excluded folders
+              if (url === '/' || shouldExcludeFolder(relativeFilePath)) return;
               
-              if (shouldExcludeFolder(relativeFilePath)) {
-                return;
-              }
+              // Extract headings and their content
+              const sections = extractHeadingsWithContent(content);
               
               const id = frontMatter.id || url.split('/').pop();
               const entry = {
@@ -82,7 +78,12 @@ module.exports = function smartSearchPlugin(context, options) {
                 keywords: Array.isArray(frontMatter.keywords) ? frontMatter.keywords : [],
                 last_update: frontMatter.last_update || null,
                 url,
-                content: content.slice(0, 300)
+                content: content.slice(0, 300),
+                // Add section data with complete URLs
+                sections: sections.map(section => ({
+                  ...section,
+                  url: `${url}#${section.id}`
+                }))
               };
 
               // Update cache
@@ -109,17 +110,15 @@ module.exports = function smartSearchPlugin(context, options) {
     async contentLoaded({content, actions}) {
       const {createData} = actions;
       
-      // Ensure the static directory exists
+      // Ensure static directory exists
       const staticDir = path.join(context.siteDir, 'static');
       if (!fs.existsSync(staticDir)) {
         fs.mkdirSync(staticDir, { recursive: true });
       }
       
-      // Write the search index directly to the static directory
+      // Write search index files
       const searchIndexPath = path.join(staticDir, 'searchIndex.json');
       fs.writeFileSync(searchIndexPath, JSON.stringify(content, null, 2));
-      
-      // Also create it in the standard location
       await createData('searchIndex.json', JSON.stringify(content));
     },
 
@@ -132,12 +131,5 @@ module.exports = function smartSearchPlugin(context, options) {
         },
       };
     },
-    
-    getThemeConfigValidationSchema() {
-      return {
-        type: 'object',
-        properties: {}
-      };
-    }
   };
 };

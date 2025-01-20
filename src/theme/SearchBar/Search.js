@@ -1,21 +1,25 @@
-import React, { useState, useEffect, useCallback, useRef, Suspense } from 'react';
+// src/theme/SearchBar/Search.js
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Input } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { useHistory } from '@docusaurus/router';
 import ExecutionEnvironment from '@docusaurus/ExecutionEnvironment';
-// Import Fuse normally since it will be a direct dependency
 import Fuse from 'fuse.js';
 import styles from './styles.module.css';
 
-// Configuration for Fuse.js search
+// Enhanced search configuration
 const fuseOptions = {
   includeScore: true,
   threshold: 0.4,
   minMatchCharLength: 2,
   keys: [
+    // Document-level searches
     { name: 'keywords', weight: 0.7 },
     { name: 'title', weight: 0.5 },
-    { name: 'description', weight: 0.3 }
+    { name: 'description', weight: 0.3 },
+    // Section-level searches
+    { name: 'sections.heading', weight: 0.6 },
+    { name: 'sections.content', weight: 0.4 }
   ]
 };
 
@@ -31,12 +35,13 @@ const Search = () => {
 
   // Initialize search index and Fuse instance
   useEffect(() => {
-    const initializeSearch = async () => {
+    async function initializeSearch() {
       try {
         const response = await fetch('/searchIndex.json');
         if (!response.ok) throw new Error('Failed to load search index');
         const data = await response.json();
 
+        // Process search index data
         const processedData = data.map(item => ({
           ...item,
           keywords: Array.isArray(item.keywords)
@@ -47,26 +52,21 @@ const Search = () => {
         }));
 
         setSearchIndex(processedData);
-        // Create new Fuse instance with processed data
-        const fuseInstance = new Fuse(processedData, fuseOptions);
-        setFuse(fuseInstance);
+        setFuse(new Fuse(processedData, fuseOptions));
       } catch (error) {
         console.error('Error initializing search:', error);
       }
-    };
+    }
 
     if (ExecutionEnvironment.canUseDOM) {
       initializeSearch();
     }
   }, []);
 
-  // Handle clicks outside the search component
+  // Handle clicks outside search component
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      // Skip if clicking on theme toggle or its children
-      if (event.target.closest('.navbar__items--right')) {
-        return;
-      }
+    function handleClickOutside(event) {
+      if (event.target.closest('.navbar__items--right')) return;
       
       if (dropdownRef.current && 
           !dropdownRef.current.contains(event.target) &&
@@ -75,13 +75,13 @@ const Search = () => {
         setSearchTerm('');
         setSearchResults([]);
       }
-    };
+    }
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Perform search with Fuse.js
+  // Enhanced search function
   const performSearch = useCallback((value) => {
     if (!value?.trim() || !fuse) {
       setSearchResults([]);
@@ -89,18 +89,56 @@ const Search = () => {
     }
 
     try {
-      // Get results from Fuse
       const results = fuse.search(value.trim());
       
-      // Process and filter results
+      // Process and combine document and section matches
       const processedResults = results
-        // Remove duplicates based on ID
+        .reduce((acc, result) => {
+          const { item, score, matches } = result;
+          
+          // Check for document-level matches
+          const documentMatch = matches.some(match => 
+            !match.path.includes('sections'));
+          
+          // Find matching sections
+          const sectionMatches = matches
+            .filter(match => match.path.includes('sections'))
+            .map(match => {
+              const sectionIndex = parseInt(match.path[1]);
+              return item.sections[sectionIndex];
+            });
+          
+          // Add document if it matched
+          if (documentMatch) {
+            acc.push({
+              type: 'document',
+              ...item,
+              score
+            });
+          }
+          
+          // Add matching sections
+          sectionMatches.forEach(section => {
+            acc.push({
+              type: 'section',
+              parentTitle: item.title,
+              parentUrl: item.url,
+              ...section,
+              score
+            });
+          });
+          
+          return acc;
+        }, [])
+        // Remove duplicates and sort by relevance
         .filter((result, index, self) => 
-          index === self.findIndex(r => r.item.id === result.item.id))
-        // Filter out results with low relevance scores
-        .filter(result => result.score <= 0.4)
-        // Map to final format
-        .map(result => result.item);
+          index === self.findIndex(r => 
+            r.type === result.type && 
+            r.url === result.url
+          )
+        )
+        .sort((a, b) => a.score - b.score)
+        .slice(0, 10); // Show top 10 results
 
       setSearchResults(processedResults);
     } catch (error) {
@@ -119,8 +157,7 @@ const Search = () => {
     setIsExpanded(false);
     setSearchTerm('');
     setSearchResults([]);
-    const formattedUrl = url.startsWith('/') ? url : `/${url}`;
-    history.replace(formattedUrl);
+    history.replace(url.startsWith('/') ? url : `/${url}`);
   };
 
   const formatDate = (lastUpdate) => {
@@ -146,24 +183,21 @@ const Search = () => {
     }
   };
 
-  const handleSearchIconClick = (e) => {
-    e.preventDefault();
-    if (isExpanded && !searchTerm) {
-      setIsExpanded(false);
-      inputRef.current?.blur();
-    } else {
-      setIsExpanded(true);
-      setTimeout(() => inputRef.current?.focus(), 100);
-    }
-  };
-
-  // Render component
   return (
     <div className={styles.searchContainer}>
       <div className={`${styles.searchWrapper} navbar-search-container ${isExpanded ? styles.expanded : ''}`}>
         <SearchOutlined 
           className={styles.searchIcon}
-          onClick={handleSearchIconClick}
+          onClick={(e) => {
+            e.preventDefault();
+            if (isExpanded && !searchTerm) {
+              setIsExpanded(false);
+              inputRef.current?.blur();
+            } else {
+              setIsExpanded(true);
+              setTimeout(() => inputRef.current?.focus(), 100);
+            }
+          }}
         />
         <Input
           ref={inputRef}
@@ -189,10 +223,12 @@ const Search = () => {
             {searchResults.length === 0 ? 'No results found' : 
              `Found ${searchResults.length} result${searchResults.length === 1 ? '' : 's'}`}
           </div>
-          {searchResults.map((item) => (
+          {searchResults.map((item, index) => (
             <div
-              key={item.id}
-              className={styles.resultItem}
+              key={`${item.type}-${item.url}-${index}`}
+              className={`${styles.resultItem} ${
+                item.type === 'section' ? styles.sectionResult : ''
+              }`}
               onClick={() => navigateToPage(item.url)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
@@ -202,13 +238,34 @@ const Search = () => {
               tabIndex={0}
               role="button"
             >
-              <div className={styles.resultTitle}>{item.title}</div>
-              <div className={styles.resultDescription}>{item.description}</div>
-              {item.last_update && (
-                <div className={styles.resultMeta}>
-                  {formatDate(item.last_update)?.date && 
-                    `Last updated: ${formatDate(item.last_update).date}`}
-                </div>
+              {item.type === 'document' ? (
+                // Document result display
+                <>
+                  <div className={styles.resultTitle}>{item.title}</div>
+                  <div className={styles.resultDescription}>
+                    {item.description}
+                  </div>
+                  {item.last_update && (
+                    <div className={styles.resultMeta}>
+                      {formatDate(item.last_update)?.date && 
+                        `Last updated: ${formatDate(item.last_update).date}`}
+                    </div>
+                  )}
+                </>
+              ) : (
+                // Section result display
+                <>
+                  <div className={styles.resultParent}>
+                    {item.parentTitle}
+                  </div>
+                  <div className={styles.resultTitle}>
+                    <span className={styles.sectionMarker}>§</span>
+                    {item.heading}
+                  </div>
+                  <div className={styles.resultDescription}>
+                    {item.content}
+                  </div>
+                </>
               )}
             </div>
           ))}

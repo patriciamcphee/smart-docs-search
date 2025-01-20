@@ -1,6 +1,6 @@
 {
   "name": "smart-search-plugin",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "description": "A modern search plugin for Docusaurus 2.x that provides enhanced search functionality with a clean, user-friendly interface. The plugin automatically indexes your documentation content, respecting exclusion rules and special cases.",
   "author": "Patricia McPhee <patti@pixlngrid.com>",
   "license": "MIT",
@@ -57,12 +57,16 @@
     "fuse.js": "^6.6.2",
     "gray-matter": "^4.0.3",
     "lodash": "^4.17.21",
-    "lunr": "^2.3.9"
+    "lunr": "^2.3.9",
+    "remark-parse": "^9.0.0",
+    "remark-stringify": "^9.0.0",
+    "unified": "^9.2.0",
+    "unist-util-visit": "^2.0.3"
   },
   "peerDependencies": {
-    "@docusaurus/core": "^2.0.0 || ^3.0.0",
-    "@docusaurus/theme-classic": "^2.0.0 || ^3.0.0",
-    "@docusaurus/theme-common": "^2.0.0 || ^3.0.0",
+    "@docusaurus/core": "^2.0.0",
+    "@docusaurus/theme-classic": "^2.0.0",
+    "@docusaurus/theme-common": "^2.0.0",
     "react": "^16.8.0 || ^17.0.0 || ^18.0.0",
     "react-dom": "^16.8.0 || ^17.0.0 || ^18.0.0"
   },
@@ -71,7 +75,7 @@
     "@babel/core": "^7.23.4",
     "@babel/preset-env": "^7.23.4",
     "@babel/preset-react": "^7.23.4",
-    "@docusaurus/module-type-aliases": "^2.0.0 || ^3.0.0",
+    "@docusaurus/module-type-aliases": "^2.0.0",
     "eslint": "^8.55.0",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0"
