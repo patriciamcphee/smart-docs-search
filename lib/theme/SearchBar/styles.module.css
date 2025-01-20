@@ -1,3 +1,5 @@
+/* src/theme/SearchBar/styles.module.css */
+
 .searchContainer {
   position: relative;
   display: flex;
@@ -29,12 +31,12 @@
   transition: all 0.3s ease;
   background: var(--ifm-background-surface-color);
   border-radius: 12px;
-  border: 0.5px solid #ccc; /* Border style */
+  border: 0.5px solid var(--ifm-color-emphasis-300);
   color: var(--ifm-font-color-base);
-  height: 36px; 
+  height: 36px;
   font-size: 16px;
-  padding: 8px 12px; /* Vertical and horizontal padding */
-  box-sizing: border-box; /* Ensures padding is included in the total height */
+  padding: 8px 12px;
+  box-sizing: border-box;
 }
 
 .searchWrapper.expanded .searchInput {
@@ -48,6 +50,7 @@
   opacity: 1;
 }
 
+/* Results dropdown styling */
 .dropdownResults {
   position: absolute;
   top: 100%;
@@ -57,7 +60,7 @@
   overflow-y: auto;
   background-color: var(--ifm-background-surface-color);
   border: 1px solid var(--ifm-color-emphasis-300);
-  border-radius: 4px;
+  border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 1000;
   margin-top: 8px;
@@ -73,18 +76,22 @@
   font-weight: 500;
 }
 
+/* Base result item styling */
 .resultItem {
   padding: 12px 16px;
   cursor: pointer;
   border-bottom: 1px solid var(--ifm-color-emphasis-200);
   transition: background-color 0.2s ease;
   background-color: var(--ifm-background-surface-color);
+  position: relative;
 }
 
-.resultItem:hover {
+.resultItem:hover,
+.resultItem.selected {
   background-color: var(--ifm-color-emphasis-100);
 }
 
+/* Document result styling */
 .resultTitle {
   color: var(--ifm-color-primary);
   font-size: 1rem;
@@ -104,10 +111,45 @@
   color: var(--ifm-color-emphasis-600);
 }
 
+/* Section result specific styling */
+.sectionResult {
+  padding-left: 32px;
+  background-color: var(--ifm-background-surface-color);
+  border-left: 3px solid var(--ifm-color-primary);
+}
+
+.resultParent {
+  font-size: 0.75rem;
+  color: var(--ifm-color-emphasis-600);
+  margin-bottom: 4px;
+}
+
+.sectionMarker {
+  position: absolute;
+  left: 12px;
+  color: var(--ifm-color-emphasis-500);
+  font-size: 0.9rem;
+}
+
+/* Grouping and hierarchy */
+.resultItem + .sectionResult {
+  margin-top: -1px;
+}
+
+.sectionResult .resultTitle {
+  font-size: 0.9rem;
+}
+
+/* Added styles for keyboard navigation */
+.selected {
+  background-color: var(--ifm-color-emphasis-200) !important;
+}
+
 /* Dark mode adjustments */
 [data-theme='dark'] .searchInput {
   background-color: var(--ifm-background-surface-color);
   color: var(--ifm-font-color-base);
+  border-color: var(--ifm-color-emphasis-300);
 }
 
 [data-theme='dark'] .dropdownResults {
@@ -121,4 +163,113 @@
 
 [data-theme='dark'] .resultDescription {
   color: var(--ifm-font-color-base);
+}
+
+[data-theme='dark'] .resultItem:hover,
+[data-theme='dark'] .resultItem.selected {
+  background-color: var(--ifm-color-emphasis-200);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .searchWrapper.expanded .searchInput {
+    width: 200px;
+  }
+  
+  .dropdownResults {
+    width: 300px;
+    right: -50px;
+  }
+}
+
+@media (max-width: 576px) {
+  .searchWrapper.expanded .searchInput {
+    width: 150px;
+  }
+  
+  .dropdownResults {
+    width: 250px;
+    right: -70px;
+  }
+  
+  .resultTitle {
+    font-size: 0.9rem;
+  }
+  
+  .resultDescription {
+    font-size: 0.8rem;
+  }
+}
+
+/* Accessibility and focus styles */
+.searchInput:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--ifm-color-primary);
+}
+
+.resultItem:focus {
+  outline: none;
+  background-color: var(--ifm-color-emphasis-100);
+}
+
+.resultItem:focus-visible {
+  outline: 2px solid var(--ifm-color-primary);
+  outline-offset: -2px;
+}
+
+/* Animation utilities */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdownResults {
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Scrollbar styling */
+.dropdownResults {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ifm-color-emphasis-300) transparent;
+}
+
+.dropdownResults::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dropdownResults::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dropdownResults::-webkit-scrollbar-thumb {
+  background-color: var(--ifm-color-emphasis-300);
+  border-radius: 3px;
+}
+
+/* Loading state styles */
+.searchWrapper.loading .searchIcon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Empty state styling */
+.emptyState {
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--ifm-color-emphasis-600);
+  font-size: 0.9rem;
 }

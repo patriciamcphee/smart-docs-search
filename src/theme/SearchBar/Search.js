@@ -1,4 +1,3 @@
-// src/theme/SearchBar/Search.js
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Input } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
@@ -7,20 +6,32 @@ import ExecutionEnvironment from '@docusaurus/ExecutionEnvironment';
 import Fuse from 'fuse.js';
 import styles from './styles.module.css';
 
-// Enhanced search configuration
-const fuseOptions = {
-  includeScore: true,
-  threshold: 0.4,
-  minMatchCharLength: 2,
-  keys: [
-    // Document-level searches
-    { name: 'keywords', weight: 0.7 },
-    { name: 'title', weight: 0.5 },
-    { name: 'description', weight: 0.3 },
-    // Section-level searches
-    { name: 'sections.heading', weight: 0.6 },
-    { name: 'sections.content', weight: 0.4 }
-  ]
+// Helper function to format dates consistently
+const formatDate = (lastUpdate) => {
+  if (!lastUpdate) return null;
+  
+  try {
+    const dateStr = typeof lastUpdate === 'string' 
+      ? lastUpdate 
+      : lastUpdate.date || lastUpdate.lastUpdatedAt;
+    
+    if (!dateStr) return null;
+
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return null;
+
+    return {
+      date: date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      }),
+      author: typeof lastUpdate === 'object' ? lastUpdate.author : null
+    };
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return null;
+  }
 };
 
 const Search = () => {
@@ -29,32 +40,85 @@ const Search = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [searchIndex, setSearchIndex] = useState([]);
   const [fuse, setFuse] = useState(null);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const inputRef = useRef(null);
   const dropdownRef = useRef(null);
+  const resultRefs = useRef([]);
   const history = useHistory();
 
   // Initialize search index and Fuse instance
   useEffect(() => {
     async function initializeSearch() {
       try {
+        setIsLoading(true);
+        setError(null);
+        console.log('Search Component: Initializing search...');
+
         const response = await fetch('/searchIndex.json');
-        if (!response.ok) throw new Error('Failed to load search index');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
+        console.log('Search Component: Loaded search index:', data);
 
-        // Process search index data
-        const processedData = data.map(item => ({
-          ...item,
-          keywords: Array.isArray(item.keywords)
-            ? item.keywords
-                .map(k => k?.toLowerCase()?.trim())
-                .filter(Boolean)
-            : []
-        }));
+        if (!Array.isArray(data) || data.length === 0) {
+          console.warn('Search Component: Search index is empty or invalid');
+          return;
+        }
 
-        setSearchIndex(processedData);
-        setFuse(new Fuse(processedData, fuseOptions));
+        // Configure Fuse options
+        const fuseOptions = {
+          includeScore: true,
+          threshold: 0.4,
+          ignoreLocation: true,
+          useExtendedSearch: true,
+          keys: [
+            { 
+              name: 'title', 
+              weight: 1.0 
+            },
+            { 
+              name: 'sections.heading', 
+              weight: 1.0 
+            },
+            {
+              name: 'keywords',
+              weight: 0.8
+            },
+            { 
+              name: 'description', 
+              weight: 0.6 
+            },
+            { 
+              name: 'sections.content', 
+              weight: 0.5 
+            },
+            { 
+              name: 'content', 
+              weight: 0.4 
+            }
+          ]
+        };
+
+        console.log('Search Component: Initializing Fuse with options:', fuseOptions);
+        const fuseInstance = new Fuse(data, fuseOptions);
+        
+        setSearchIndex(data);
+        setFuse(fuseInstance);
+        setIsLoading(false);
+
+        // Perform a test search
+        const testResults = fuseInstance.search('test');
+        console.log('Search Component: Test search results:', testResults);
+
       } catch (error) {
-        console.error('Error initializing search:', error);
+        console.error('Search Component: Error initializing search:', error);
+        setError(error);
+        setIsLoading(false);
       }
     }
 
@@ -63,125 +127,189 @@ const Search = () => {
     }
   }, []);
 
-  // Handle clicks outside search component
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (event.target.closest('.navbar__items--right')) return;
-      
-      if (dropdownRef.current && 
-          !dropdownRef.current.contains(event.target) &&
-          !event.target.closest('.navbar-search-container')) {
-        setIsExpanded(false);
-        setSearchTerm('');
-        setSearchResults([]);
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  // Enhanced search function
-  const performSearch = useCallback((value) => {
-    if (!value?.trim() || !fuse) {
+  const performSearch = useCallback((term) => {
+    if (!term?.trim() || !fuse) {
       setSearchResults([]);
       return;
     }
 
     try {
-      const results = fuse.search(value.trim());
+      console.log('Search Component: Performing search for:', term);
       
-      // Process and combine document and section matches
-      const processedResults = results
-        .reduce((acc, result) => {
-          const { item, score, matches } = result;
+      // Perform the search
+      const results = fuse.search(term);
+      console.log('Search Component: Raw search results:', results);
+
+      // Process results and include sections
+      const processedResults = [];
+      
+      results
+        .filter(result => result.score <= 0.4) // Keep only good matches
+        .forEach(result => {
+          const item = result.item;
           
-          // Check for document-level matches
-          const documentMatch = matches.some(match => 
-            !match.path.includes('sections'));
-          
-          // Find matching sections
-          const sectionMatches = matches
-            .filter(match => match.path.includes('sections'))
-            .map(match => {
-              const sectionIndex = parseInt(match.path[1]);
-              return item.sections[sectionIndex];
+          // Add the main document result
+          processedResults.push({
+            type: 'document',
+            title: item.title,
+            url: item.url,
+            previewContent: item.description || item.content?.slice(0, 150) || '',
+            last_update: item.last_update,
+            score: result.score
+          });
+
+          // Add matching sections
+          if (item.sections && Array.isArray(item.sections)) {
+            const sectionMatches = item.sections.filter(section => {
+              const searchTermLower = term.toLowerCase();
+              return (
+                section.heading?.toLowerCase().includes(searchTermLower) ||
+                section.content?.toLowerCase().includes(searchTermLower)
+              );
             });
-          
-          // Add document if it matched
-          if (documentMatch) {
-            acc.push({
-              type: 'document',
-              ...item,
-              score
+
+            sectionMatches.forEach(section => {
+              processedResults.push({
+                type: 'section',
+                parentTitle: item.title,
+                heading: section.heading,
+                url: section.url || `${item.url}#${section.id}`,
+                previewContent: section.content?.slice(0, 150) || '',
+                score: result.score + 0.1 // Slightly lower priority than parent document
+              });
             });
           }
-          
-          // Add matching sections
-          sectionMatches.forEach(section => {
-            acc.push({
-              type: 'section',
-              parentTitle: item.title,
-              parentUrl: item.url,
-              ...section,
-              score
-            });
-          });
-          
-          return acc;
-        }, [])
-        // Remove duplicates and sort by relevance
-        .filter((result, index, self) => 
-          index === self.findIndex(r => 
-            r.type === result.type && 
-            r.url === result.url
-          )
-        )
-        .sort((a, b) => a.score - b.score)
-        .slice(0, 10); // Show top 10 results
+        });
 
+      // Sort by score
+      processedResults.sort((a, b) => a.score - b.score);
+
+      console.log('Search Component: Processed results:', processedResults);
       setSearchResults(processedResults);
+      
     } catch (error) {
-      console.error('Search error:', error);
+      console.error('Search Component: Error during search:', error);
       setSearchResults([]);
     }
   }, [fuse]);
 
+  // Handle search input changes
   const handleSearchChange = useCallback((e) => {
     const value = e.target.value;
     setSearchTerm(value);
     performSearch(value);
   }, [performSearch]);
 
-  const navigateToPage = (url) => {
+  // Handle navigation to search result
+  const navigateToPage = useCallback((url) => {
+    closeSearch();
+    const formattedUrl = url.startsWith('/') ? url : `/${url}`;
+    history.replace(formattedUrl);
+  }, [history]);
+
+  // Close search and reset state
+  const closeSearch = useCallback(() => {
     setIsExpanded(false);
     setSearchTerm('');
     setSearchResults([]);
-    history.replace(url.startsWith('/') ? url : `/${url}`);
+    setSelectedIndex(-1);
+  }, []);
+
+  // Handle keyboard navigation
+  const handleKeyDown = useCallback((e) => {
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setSelectedIndex(prev => 
+          prev < searchResults.length - 1 ? prev + 1 : prev
+        );
+        break;
+        
+      case 'ArrowUp':
+        e.preventDefault();
+        setSelectedIndex(prev => prev > 0 ? prev - 1 : -1);
+        break;
+        
+      case 'Enter':
+        e.preventDefault();
+        if (selectedIndex >= 0 && searchResults[selectedIndex]) {
+          navigateToPage(searchResults[selectedIndex].url);
+        } else if (searchResults.length > 0) {
+          navigateToPage(searchResults[0].url);
+        }
+        break;
+        
+      case 'Escape':
+        e.preventDefault();
+        closeSearch();
+        break;
+    }
+  }, [searchResults, selectedIndex, navigateToPage, closeSearch]);
+
+  // Render an individual search result
+  const renderSearchResult = (item, index) => {
+    const isSelected = index === selectedIndex;
+    
+    return (
+      <div
+        ref={el => resultRefs.current[index] = el}
+        key={`${item.type}-${item.url}-${index}`}
+        className={`${styles.resultItem} ${
+          item.type === 'section' ? styles.sectionResult : ''
+        } ${isSelected ? styles.selected : ''}`}
+        onClick={() => navigateToPage(item.url)}
+        onMouseEnter={() => setSelectedIndex(index)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            navigateToPage(item.url);
+          }
+        }}
+        tabIndex={0}
+        role="button"
+        aria-selected={isSelected}
+      >
+        {item.type === 'document' ? (
+          <>
+            <div className={styles.resultTitle}>{item.title}</div>
+            <div className={styles.resultDescription}>
+              {item.previewContent}
+            </div>
+            {item.last_update && (
+              <div className={styles.resultMeta}>
+                {formatDate(item.last_update)?.date && 
+                  `Last updated: ${formatDate(item.last_update).date}`}
+                {formatDate(item.last_update)?.author && 
+                  ` by ${formatDate(item.last_update).author}`}
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            <div className={styles.resultParent}>
+              {item.parentTitle}
+            </div>
+            <div className={styles.resultTitle}>
+              <span className={styles.sectionMarker}>§</span>
+              {item.heading}
+            </div>
+            <div className={styles.resultDescription}>
+              {item.previewContent}
+            </div>
+          </>
+        )}
+      </div>
+    );
   };
 
-  const formatDate = (lastUpdate) => {
-    if (!lastUpdate) return null;
-    try {
-      const dateStr = typeof lastUpdate === 'string' 
-        ? lastUpdate 
-        : lastUpdate.date || lastUpdate.lastUpdatedAt;
-      
-      if (!dateStr) return null;
-  
-      const date = new Date(dateStr);
-      return isNaN(date.getTime()) ? null : {
-        date: date.toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric'
-        }),
-        author: typeof lastUpdate === 'object' ? lastUpdate.author : null
-      };
-    } catch (error) {
-      return null;
+  // Scroll selected result into view
+  useEffect(() => {
+    if (selectedIndex >= 0 && resultRefs.current[selectedIndex]) {
+      resultRefs.current[selectedIndex].scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest'
+      });
     }
-  };
+  }, [selectedIndex]);
 
   return (
     <div className={styles.searchContainer}>
@@ -191,8 +319,7 @@ const Search = () => {
           onClick={(e) => {
             e.preventDefault();
             if (isExpanded && !searchTerm) {
-              setIsExpanded(false);
-              inputRef.current?.blur();
+              closeSearch();
             } else {
               setIsExpanded(true);
               setTimeout(() => inputRef.current?.focus(), 100);
@@ -204,71 +331,26 @@ const Search = () => {
           placeholder="Search documentation..."
           value={searchTerm}
           onChange={handleSearchChange}
+          onKeyDown={handleKeyDown}
           className={`${styles.searchInput} ${isExpanded ? styles.visible : ''}`}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && searchResults.length > 0) {
-              navigateToPage(searchResults[0].url);
-            } else if (e.key === 'Escape') {
-              setIsExpanded(false);
-              setSearchTerm('');
-              setSearchResults([]);
-            }
-          }}
+          aria-expanded={isExpanded}
+          aria-controls="search-results"
+          aria-autocomplete="list"
         />
       </div>
       
       {isExpanded && searchTerm && (
-        <div className={styles.dropdownResults} ref={dropdownRef}>
+        <div 
+          id="search-results"
+          className={styles.dropdownResults} 
+          ref={dropdownRef}
+          role="listbox"
+        >
           <div className={styles.resultCount}>
             {searchResults.length === 0 ? 'No results found' : 
              `Found ${searchResults.length} result${searchResults.length === 1 ? '' : 's'}`}
           </div>
-          {searchResults.map((item, index) => (
-            <div
-              key={`${item.type}-${item.url}-${index}`}
-              className={`${styles.resultItem} ${
-                item.type === 'section' ? styles.sectionResult : ''
-              }`}
-              onClick={() => navigateToPage(item.url)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  navigateToPage(item.url);
-                }
-              }}
-              tabIndex={0}
-              role="button"
-            >
-              {item.type === 'document' ? (
-                // Document result display
-                <>
-                  <div className={styles.resultTitle}>{item.title}</div>
-                  <div className={styles.resultDescription}>
-                    {item.description}
-                  </div>
-                  {item.last_update && (
-                    <div className={styles.resultMeta}>
-                      {formatDate(item.last_update)?.date && 
-                        `Last updated: ${formatDate(item.last_update).date}`}
-                    </div>
-                  )}
-                </>
-              ) : (
-                // Section result display
-                <>
-                  <div className={styles.resultParent}>
-                    {item.parentTitle}
-                  </div>
-                  <div className={styles.resultTitle}>
-                    <span className={styles.sectionMarker}>§</span>
-                    {item.heading}
-                  </div>
-                  <div className={styles.resultDescription}>
-                    {item.content}
-                  </div>
-                </>
-              )}
-            </div>
-          ))}
+          {searchResults.map((item, index) => renderSearchResult(item, index))}
         </div>
       )}
     </div>
