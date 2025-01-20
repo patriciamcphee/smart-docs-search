@@ -169,10 +169,17 @@ const Search = () => {
         .sort((a, b) => a.score - b.score)
         .reduce((acc, doc) => {
           // Add the document
-          acc.push(doc);
-          // Add its sections, sorted by score
+          // Add the document with search term for highlighting
+          acc.push({
+            ...doc,
+            searchTerm
+          });
+          // Add its sections with search term for highlighting
           if (doc.sections.length > 0) {
-            acc.push(...doc.sections.sort((a, b) => a.score - b.score));
+            acc.push(...doc.sections.map(section => ({
+              ...section,
+              searchTerm
+            })).sort((a, b) => a.score - b.score));
           }
           return acc;
         }, []);
@@ -230,6 +237,28 @@ const Search = () => {
     }
   }, [searchResults, selectedIndex, navigateToPage]);
 
+  // Utility function to highlight text matches
+const highlightText = (text, searchTerm) => {
+  if (!text || !searchTerm) return text;
+  
+  const searchTerms = searchTerm.trim().toLowerCase().split(/\s+/);
+  
+  // Create a regex pattern that matches any of the search terms
+  const pattern = new RegExp(`(${searchTerms.map(term => 
+    term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  ).join('|')})`, 'gi');
+
+  // Split the text into parts that should and shouldn't be highlighted
+  const parts = text.split(pattern);
+
+  return parts.map((part, i) => {
+    if (searchTerms.some(term => part.toLowerCase() === term)) {
+      return <mark key={i} className={styles.highlighted}>{part}</mark>;
+    }
+    return part;
+  });
+};
+
   // Render an individual search result
   const renderSearchResult = (result, index) => {
     const isSelected = index === selectedIndex;
@@ -249,10 +278,12 @@ const Search = () => {
       >
         {result.type === 'document' ? (
           <>
-            <div className={styles.resultTitle}>{result.title}</div>
+            <div className={styles.resultTitle}>
+              {highlightText(result.title, result.searchTerm)}
+            </div>
             {result.previewContent && (
               <div className={styles.resultDescription}>
-                {result.previewContent}
+                {highlightText(result.previewContent, result.searchTerm)}
               </div>
             )}
             {result.last_update && (
@@ -268,7 +299,7 @@ const Search = () => {
           <>
             <div className={styles.resultTitle}>
               <span className={styles.sectionMarker}>§</span>
-              {result.heading}
+              {highlightText(result.heading, result.searchTerm)}
             </div>
           </>
         )}

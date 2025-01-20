@@ -140,6 +140,22 @@
   background-color: var(--ifm-color-emphasis-200) !important;
 }
 
+/* Base highlight style - light mode */
+.highlighted {
+  background-color: yellow; /* Light yellow */
+  padding: 0 2px;
+  border-radius: 2px;
+  margin: 0 -2px;
+}
+
+
+
+/* Hover state for highlights */
+.resultItem:hover .highlighted {
+  background-color: rgba(255, 246, 157, 0.4); /* Slightly more intense on hover */
+}
+
+
 /* Dark mode adjustments */
 [data-theme='dark'] .searchInput {
   background-color: var(--ifm-background-surface-color);
