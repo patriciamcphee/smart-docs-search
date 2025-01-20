@@ -13,7 +13,7 @@ module.exports = function smartSearchPlugin(context, options) {
     async loadContent() {
       const docsDir = path.join(context.siteDir, 'docs');
       const searchIndex = [];
-      const excludedFolders = ['contributor-guide'];
+      const excludedFolders = ['contributor-guide', 'includes'];
 
       function getFileHash(filePath) {
         const stats = fs.statSync(filePath);
