@@ -127,6 +127,16 @@
   transition: background-color 0.2s ease;
 }
 
+.resultItem:focus {
+  outline: 2px solid #0066cc;
+  outline-offset: -2px;
+}
+
+.resultItem.selected:focus {
+  outline: 2px solid #0066cc;
+  background-color: #f0f0f0;
+}
+
 .resultItem:hover,
 .resultItem.selected {
   background-color: var(--ifm-color-emphasis-100);
