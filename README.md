@@ -159,7 +159,6 @@ The search functionality seamlessly integrates with your Docusaurus theme while 
 
 The search interface supports full keyboard navigation:
 
-- `/` or `Ctrl+K`: Focus search input
 - `↑` / `↓`: Navigate through results
 - `Enter`: Go to selected result
 - `Escape`: Clear search or close dropdown
