@@ -35,6 +35,7 @@ const formatDate = (lastUpdate) => {
 
 const Search = () => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searchIndex, setSearchIndex] = useState([]);
@@ -234,19 +235,17 @@ const Search = () => {
         break;
       case 'Enter':
         e.preventDefault();
-        if (searchResults.length > 0) {
-          if (selectedIndex === -1) {
-            // If no item is selected, navigate to first result
-            navigateToPage(searchResults[0].url);
-          } else if (searchResults[selectedIndex]) {
-            navigateToPage(searchResults[selectedIndex].url);
-          }
+        if (searchResults.length > 0 && selectedIndex >= 0) {
+          navigateToPage(searchResults[selectedIndex].url);
+        } else if (searchResults.length > 0) {
+          // If no item is selected, navigate to first result
+          navigateToPage(searchResults[0].url);
         }
         break;
       case 'Tab':
-        // Don't prevent default to allow normal tab behavior
+        // Allow natural tab behavior but update selected index
         const newIndex = e.shiftKey ? 
-          Math.max(0, selectedIndex - 1) : 
+          Math.max(-1, selectedIndex - 1) : 
           Math.min(searchResults.length - 1, selectedIndex + 1);
         setSelectedIndex(newIndex);
         break;
@@ -256,6 +255,16 @@ const Search = () => {
         break;
     }
   }, [searchResults, selectedIndex, navigateToPage, handleSearchClose, isExpanded]);
+
+  // Add focus handlers for result items
+  const handleResultFocus = useCallback((index) => {
+    setSelectedIndex(index);
+    setIsFocused(true);
+  }, []);
+
+  const handleResultBlur = useCallback(() => {
+    setIsFocused(false);
+  }, []);
 
   // Utility function to highlight text matches
 const highlightText = (text, searchTerm) => {
@@ -292,8 +301,16 @@ const highlightText = (text, searchTerm) => {
         } ${isSelected ? styles.selected : ''}`}
         onClick={() => navigateToPage(result.url)}
         onMouseEnter={() => setSelectedIndex(index)}
+        onFocus={() => handleResultFocus(index)}
+        onBlur={handleResultBlur}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            navigateToPage(result.url);
+          }
+        }}
         tabIndex={0}
-        role="button"
+        role="option"
         aria-selected={isSelected}
       >
         {result.type === 'document' ? (
@@ -390,6 +407,8 @@ const highlightText = (text, searchTerm) => {
           className={styles.dropdownResults} 
           ref={dropdownRef}
           role="listbox"
+          tabIndex="-1"
+          aria-activedescendant={selectedIndex >= 0 ? `result-${selectedIndex}` : undefined}
         >
           <div className={styles.resultCount}>
             {searchResults.length === 0 ? 'No results found' : 
