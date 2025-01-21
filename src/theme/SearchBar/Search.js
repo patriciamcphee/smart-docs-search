@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Input } from 'antd';
+import { Input, Tooltip } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import { useHistory } from '@docusaurus/router';
 import ExecutionEnvironment from '@docusaurus/ExecutionEnvironment';
@@ -198,19 +198,29 @@ const Search = () => {
     setSearchTerm(value);
     performSearch(value);
     setIsExpanded(true);
+    setSelectedIndex(-1);
   }, [performSearch]);
 
-  // Handle navigation
-  const navigateToPage = useCallback((url) => {
+  // Handle search close
+  const handleSearchClose = useCallback(() => {
     setIsExpanded(false);
     setSearchTerm('');
     setSearchResults([]);
+    setSelectedIndex(-1);
+    inputRef.current?.blur();
+  }, []);
+
+  // Handle navigation
+  const navigateToPage = useCallback((url) => {
+    handleSearchClose();
     const formattedUrl = url.startsWith('/') ? url : `/${url}`;
     history.push(formattedUrl);
-  }, [history]);
+  }, [history, handleSearchClose]);
 
   // Handle keyboard navigation
   const handleKeyDown = useCallback((e) => {
+    if (!isExpanded) return;
+
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
@@ -220,22 +230,32 @@ const Search = () => {
         break;
       case 'ArrowUp':
         e.preventDefault();
-        setSelectedIndex(prev => prev > 0 ? prev - 1 : -1);
+        setSelectedIndex(prev => prev > 0 ? prev - 1 : 0);
         break;
       case 'Enter':
         e.preventDefault();
-        if (selectedIndex >= 0 && searchResults[selectedIndex]) {
-          navigateToPage(searchResults[selectedIndex].url);
+        if (searchResults.length > 0) {
+          if (selectedIndex === -1) {
+            // If no item is selected, navigate to first result
+            navigateToPage(searchResults[0].url);
+          } else if (searchResults[selectedIndex]) {
+            navigateToPage(searchResults[selectedIndex].url);
+          }
         }
+        break;
+      case 'Tab':
+        // Don't prevent default to allow normal tab behavior
+        const newIndex = e.shiftKey ? 
+          Math.max(0, selectedIndex - 1) : 
+          Math.min(searchResults.length - 1, selectedIndex + 1);
+        setSelectedIndex(newIndex);
         break;
       case 'Escape':
         e.preventDefault();
-        setIsExpanded(false);
-        setSearchTerm('');
-        setSearchResults([]);
+        handleSearchClose();
         break;
     }
-  }, [searchResults, selectedIndex, navigateToPage]);
+  }, [searchResults, selectedIndex, navigateToPage, handleSearchClose, isExpanded]);
 
   // Utility function to highlight text matches
 const highlightText = (text, searchTerm) => {
@@ -317,16 +337,40 @@ const highlightText = (text, searchTerm) => {
     }
   }, [selectedIndex]);
 
+  const toggleSearch = useCallback(() => {
+    if (isExpanded) {
+      handleSearchClose();
+    } else {
+      setIsExpanded(true);
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
+  }, [isExpanded, handleSearchClose]);
+
   return (
     <div className={styles.searchContainer}>
-      <div className={`${styles.searchWrapper} navbar-search-container ${isExpanded ? styles.expanded : ''}`}>
-        <SearchOutlined 
-          className={styles.searchIcon}
-          onClick={() => {
-            setIsExpanded(true);
-            setTimeout(() => inputRef.current?.focus(), 100);
-          }}
-        />
+      <div className={`${styles.searchWrapper} ${isExpanded ? styles.expanded : ''}`}>
+        {isExpanded ? (
+          <Tooltip 
+            title="Click to close"
+            placement="bottom"
+            mouseEnterDelay={0.5}
+            overlayClassName={styles.searchTooltip}
+            overlayInnerStyle={{ paddingTop: '10px' }}
+            align={{
+              offset: [0, 15]
+            }}
+          >
+            <SearchOutlined 
+              className={styles.searchIcon}
+              onClick={toggleSearch}
+            />
+          </Tooltip>
+        ) : (
+          <SearchOutlined 
+            className={styles.searchIcon}
+            onClick={toggleSearch}
+          />
+        )}
         <Input
           ref={inputRef}
           placeholder="Search documentation..."
