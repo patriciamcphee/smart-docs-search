@@ -1,6 +1,6 @@
 {
   "name": "smart-search-plugin",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "A modern search plugin for Docusaurus 2.x that provides enhanced search functionality with a clean, user-friendly interface.",
   "author": "Patricia McPhee <patti@pixlngrid.com>",
   "license": "MIT",
