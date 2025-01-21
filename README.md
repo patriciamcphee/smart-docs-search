@@ -8,14 +8,14 @@ A metadata-driven search plugin for Docusaurus 2.x that provides targeted, effic
 
 ## Why Smart Search?
 
-The Smart Search Plugin reintroduces the proven concept of metadata keywords for documentation search:
+The Smart Search Plugin reintroduces the proven concept of metadata keywords for documentation search while adding modern fuzzy search capabilities:
 
-- 🎯 **Targeted Results**: Only content tagged with relevant metadata appears
-- 🔍 **Precise Matching**: Avoids information overload from full-text indexing
+- 🎯 **Targeted Results**: Content tagged with relevant metadata receives higher ranking
+- 🔍 **Fuzzy Search**: Intelligent matching tolerates typos and partial matches
 - 🏃‍♀️ **Offline Operation**: Works behind firewalls without external API dependencies
 - ⚡️ **Local Testing**: Test search functionality during development
 - 📱 **Modern Interface**: Responsive design with full keyboard navigation
-
+- ♿️ **Accessibility**: ARIA-compliant with keyboard navigation and screen reader support
 
 
 ## Installation
@@ -157,56 +157,28 @@ The search functionality seamlessly integrates with your Docusaurus theme while 
 
 ### Keyboard shortcuts
 
-- `Enter`: Navigate to first result
-- `Escape`: Close search dropdown
-- `Tab`: Navigate through results
-- `Arrow Up/Down`: Navigate results (coming soon)
+The search interface supports full keyboard navigation:
 
-### Styling customization
+- `/` or `Ctrl+K`: Focus search input
+- `↑` / `↓`: Navigate through results
+- `Enter`: Go to selected result
+- `Escape`: Clear search or close dropdown
+- `Tab`: Navigate through interactive elements
 
-Override default styles by creating a custom CSS module with these classes:
-
-```css
-.searchContainer    /* Main container */
-.searchWrapper     /* Input container */
-.searchIcon        /* Search icon */
-.searchInput       /* Search input */
-.dropdownResults   /* Results dropdown */
-.resultItem        /* Individual result */
-.resultTitle      /* Result title */
-.resultMeta       /* Update information */
-
-```
 
 ## Technical details
-
-### Project architecture
-
-```
-smart-search-plugin/
-├── src/
-│   ├── index.js           # Plugin core
-│   └── theme/
-│       ├── index.js       # Theme exports
-│       ├── Layout.js      # Layout integration
-│       ├── Root.js        # Root component
-│       └── SearchBar/
-│           ├── Search.js  # Search component
-│           └── styles.module.css
-└── lib/                   # Compiled output
-
-```
 
 ### Dependencies
 
 The plugin uses these key dependencies:
 
-- `lunr`: Search implementation
+- `fuse.js`: Fuzzy search implementation
 - `antd`: UI components
-- `gray-matter`: Frontmatter parsing
 - `@ant-design/icons`: UI icons
+- `gray-matter`: Frontmatter parsing
+- `unified`: Content processing
 
-### Browser support
+### Browser Support
 
 - Modern browsers (Chrome, Firefox, Safari, Edge)
 - IE11 not supported
@@ -231,4 +203,4 @@ Built with:
 
 - [Docusaurus](https://docusaurus.io/)
 - [Ant Design](https://ant.design/)
-- [Lunr.js](https://lunrjs.com/)
+- [Fuse.js](https://fusejs.io/)
