@@ -190,5 +190,13 @@ module.exports = function smartSearchPlugin(context, options) {
         },
       };
     },
+
+    getThemePath() {
+      return path.resolve(__dirname, 'theme');
+    },
+
+    getTypeScriptThemePath() {
+      return path.resolve(__dirname, 'src', 'theme');
+    },
   };
 };

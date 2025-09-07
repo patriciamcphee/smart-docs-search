@@ -1,3 +1,5 @@
+// src/theme/SearchBar/Search.js
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Input, Tooltip } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
@@ -46,8 +48,42 @@ const Search = () => {
 
   const inputRef = useRef(null);
   const dropdownRef = useRef(null);
+  const containerRef = useRef(null);
   const resultRefs = useRef([]);
   const history = useHistory();
+
+  // Click outside handler
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        handleSearchClose();
+      }
+    };
+
+    if (isExpanded) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [isExpanded]);
+
+  // Escape key handler
+  useEffect(() => {
+    const handleEscapeKey = (event) => {
+      if (event.key === 'Escape' && isExpanded) {
+        handleSearchClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscapeKey);
+    return () => {
+      document.removeEventListener('keydown', handleEscapeKey);
+    };
+  }, [isExpanded]);
 
   // Initialize search index and Fuse instance
   useEffect(() => {
@@ -169,7 +205,6 @@ const Search = () => {
       const processedResults = Array.from(documentMap.values())
         .sort((a, b) => a.score - b.score)
         .reduce((acc, doc) => {
-          // Add the document
           // Add the document with search term for highlighting
           acc.push({
             ...doc,
@@ -267,26 +302,26 @@ const Search = () => {
   }, []);
 
   // Utility function to highlight text matches
-const highlightText = (text, searchTerm) => {
-  if (!text || !searchTerm) return text;
-  
-  const searchTerms = searchTerm.trim().toLowerCase().split(/\s+/);
-  
-  // Create a regex pattern that matches any of the search terms
-  const pattern = new RegExp(`(${searchTerms.map(term => 
-    term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  ).join('|')})`, 'gi');
+  const highlightText = (text, searchTerm) => {
+    if (!text || !searchTerm) return text;
+    
+    const searchTerms = searchTerm.trim().toLowerCase().split(/\s+/);
+    
+    // Create a regex pattern that matches any of the search terms
+    const pattern = new RegExp(`(${searchTerms.map(term => 
+      term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    ).join('|')})`, 'gi');
 
-  // Split the text into parts that should and shouldn't be highlighted
-  const parts = text.split(pattern);
+    // Split the text into parts that should and shouldn't be highlighted
+    const parts = text.split(pattern);
 
-  return parts.map((part, i) => {
-    if (searchTerms.some(term => part.toLowerCase() === term)) {
-      return <mark key={i} className={styles.highlighted}>{part}</mark>;
-    }
-    return part;
-  });
-};
+    return parts.map((part, i) => {
+      if (searchTerms.some(term => part.toLowerCase() === term)) {
+        return <mark key={i} className={styles.highlighted}>{part}</mark>;
+      }
+      return part;
+    });
+  };
 
   // Render an individual search result
   const renderSearchResult = (result, index) => {
@@ -364,7 +399,7 @@ const highlightText = (text, searchTerm) => {
   }, [isExpanded, handleSearchClose]);
 
   return (
-    <div className={styles.searchContainer}>
+    <div className={styles.searchContainer} ref={containerRef}>
       <div className={`${styles.searchWrapper} ${isExpanded ? styles.expanded : ''}`}>
         {isExpanded ? (
           <Tooltip 
