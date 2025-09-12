@@ -1,10 +1,8 @@
-# .npmignore
-src/
-tests/
-.babel*
-.git*
-.prettier*
-.eslint*
-*.test.js
-coverage/
-docs/
+src
+scripts
+.gitignore
+.editorconfig
+tsconfig.json
+*.log
+.idea
+.vscode

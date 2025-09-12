@@ -1,205 +1,118 @@
-# Smart Search Plugin for Docusaurus
+# smart-search-plugin
 
-A metadata-driven search plugin for Docusaurus 2.x that provides targeted, efficient search capabilities with an elegant, accessible interface. By leveraging metadata keywords, this plugin delivers precise search results while working seamlessly offline and in firewall-restricted environments.
+A powerful fuzzy search plugin for Docusaurus 3.x that provides real-time local search with section-level results.
 
-👉 [Try the live demo](https://smart-search-plugin-demo.vercel.app/) | 📝 [Read the full blog post](https://www.patriciamcphee.com/blog/2024/11/08/enhancing-search-functionality/)
+## Features
 
-> Support for Docusaurus 3.x is a work in progress. Stay tuned!
-
-## Why Smart Search?
-
-The Smart Search Plugin reintroduces the proven concept of metadata keywords for documentation search while adding modern fuzzy search capabilities:
-
-- 🎯 **Targeted Results**: Content tagged with relevant metadata receives higher ranking
-- 🔍 **Fuzzy Search**: Intelligent matching tolerates typos and partial matches
-- 🏃‍♀️ **Offline Operation**: Works behind firewalls without external API dependencies
-- ⚡️ **Local Testing**: Test search functionality during development
-- 📱 **Modern Interface**: Responsive design with full keyboard navigation
-- ♿️ **Accessibility**: ARIA-compliant with keyboard navigation and screen reader support
-
+- 🔍 **Fuzzy Search**: Tolerant to typos using Fuse.js
+- 📑 **Section-Level Search**: Search within document headings
+- ⚡ **Real-Time Results**: Instant search as you type
+- 🎨 **Modern UI**: Clean interface with Ant Design
+- 🌙 **Dark Mode Support**: Seamless theme adaptation
+- ⌨️ **Keyboard Navigation**: Full keyboard support
+- 📊 **Smart Ranking**: Customizable result weights
+- 🚀 **Static Index**: Pre-built for performance
 
 ## Installation
 
 ```bash
-npm install smart-search-plugin
-```
-
-```bash
-yarn add smart-search-plugin
+npm install smart-search-plugin antd fuse.js
+# or
+yarn add smart-search-plugin antd fuse.js
 ```
 
 ## Configuration
 
-Add the plugin to your `docusaurus.config.js`:
+Add to your `docusaurus.config.js`:
 
-```jsx
-const path = require('path');
-
-  staticDirectories: ['static'], // Required for search index
-
+```javascript
+module.exports = {
   plugins: [
-    path.resolve(__dirname, 'node_modules/smart-search-plugin')
-  ],
-
-  presets: [
     [
-      '@docusaurus/preset-classic',
+      'smart-search-plugin',
       {
-        docs: {
-          routeBasePath: '/',  // Required
-          path: 'docs', // Required for the correct linking of topics
-          showLastUpdateTime: true, // Enables last update display
-        },
-      },
-    ],
+        // Optional configuration
+        excludedFolders: ['drafts', 'archive'],
+        excludedPrefixes: ['_'],
+        searchWeights: {
+          title: 1.0,
+          'sections.heading': 1.0,
+          keywords: 0.8,
+          description: 0.6,
+          'sections.content': 0.5,
+          content: 0.4
+        }
+      }
+    ]
   ],
-
+  
+  // If using classic theme, ensure SearchBar is swizzled or replaced
   themeConfig: {
-       navbar: {
+    navbar: {
       items: [
-        {
-          type: 'search',
-          position: 'right',
-        },
-      ],
-    },
-  },
+        // ... other items
+      ]
+    }
+  }
 };
-
 ```
 
-## Document structure
+## Options
 
-### Required directory structure
+| Option             | Type       | Default                                          | Description              |
+| :----------------- | :--------- | :----------------------------------------------- | :----------------------- |
+| `excludedFolders`  | `string[]` | `['contributor-guide', 'includes', '_includes']` | Folders to exclude       |
+| `excludedPrefixes` | `string[]` | `['_']`                                          | File prefixes to exclude |
+| `searchWeights`    | `object`   | See below                                        | Customize result ranking |
 
-```
-your-docusaurus-site/
-├── docs/                   # Documentation root
-│   ├── intro.md           # Documentation files
-│   └── advanced/
-│       └── config.md
-├── static/                 # Static assets directory
-└── docusaurus.config.js    # Configuration file
+## Usage
 
-```
+The plugin automatically:
 
-### Frontmatter configuration
+1. Indexes your docs at build time
 
-Your markdown files can include these frontmatter fields for enhanced search functionality:
+2. Creates a static search index
 
-```markdown
+3. Provides a SearchBar component
+
+4. Handles all search functionality
+
+### Excluding Documents
+
+Add to frontmatter:
+
+```yaml
 ---
-title: Document Title
-description: A brief description that appears in search results
-keywords: [search, docusaurus, plugin]
-draft: false                # Exclude from search when true
-last_update:               # Optional update tracking
-  date: 2024-03-20
-  author: John Doe
+title: My Document
+draft: true  # Excludes from search
+# or
+search_exclude: true  # Also excludes
 ---
-
 ```
 
-## Content processing
+## Compatibility
 
-### Smart content indexing
+- Docusaurus 3.x
 
-The plugin processes your content with these features:
+- React 18+ or 19+
 
-1. **Intelligent caching**
-    - File-based caching system for faster builds
-    - Automatic detection of content changes
-    - Incremental rebuilding for modified files only
-2. **Content normalization**
-    - Consistent URL generation across platforms
-    - Special handling for index files
-    - Clean URL paths for improved SEO
-3. **Automatic exclusions**
-Content automatically excluded from search:
-    - Root/welcome page (URL: '/')
-    - Draft documents
-    - Content in excluded folders (default: 'contributor-guide')
-    - Files with `draft: true` in frontmatter
+- Node.js 18+
 
-### Search index generation
+## Migration from v2
 
-The plugin creates two search index files:
+If migrating from Docusaurus 2.x version:
 
-- `/build/searchIndex.json`: Public search index
-- `/static/searchIndex.json`: Development index
+1. Update Docusaurus to v3
 
-## User interface
+2. Install this package
 
-### Search component features
-
-The search interface provides:
-
-- Expandable search input
-- Real-time results dropdown
-- Keyboard navigation support
-- Result highlighting
-- Last update information display
-- Mobile-friendly design
-
-### Search Implementation
-
-Here's how the Smart Search Plugin appears in your Docusaurus navbar:
-
-1. **Inactive state**
-   
-   ![Image showing the search bar in its inactive state](https://github.com/patriciamcphee/portfolio/blob/main/blog/images/search-icon-only.png?raw=true)
-
-2. **Activated state with results**
-
-   ![Image showing the expanded search bar when clicked](https://github.com/patriciamcphee/portfolio/blob/main/blog/images/search-results.png?raw=true)
-
-The search functionality seamlessly integrates with your Docusaurus theme while maintaining the metadata-driven approach.
-
-### Keyboard shortcuts
-
-The search interface supports full keyboard navigation:
-
-- `↑` / `↓`: Navigate through results
-- `Enter`: Go to selected result
-- `Escape`: Clear search or close dropdown
-- `Tab`: Navigate through interactive elements
-
-
-## Technical details
-
-### Dependencies
-
-The plugin uses these key dependencies:
-
-- `fuse.js`: Fuzzy search implementation
-- `antd`: UI components
-- `@ant-design/icons`: UI icons
-- `gray-matter`: Frontmatter parsing
-- `unified`: Content processing
-
-### Browser Support
-
-- Modern browsers (Chrome, Firefox, Safari, Edge)
-- IE11 not supported
-
-## Contributing
-
-We welcome contributions! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+3. Update configuration as shown above
 
 ## License
 
-MIT
+MIT &copy; Patricia McPhee
 
-## Credits
+## Contributing
 
-Built with:
+Issues and PRs welcome at [GitHub](https://github.com/patriciamcphee/smart-search-plugin)
 
-- [Docusaurus](https://docusaurus.io/)
-- [Ant Design](https://ant.design/)
-- [Fuse.js](https://fusejs.io/)

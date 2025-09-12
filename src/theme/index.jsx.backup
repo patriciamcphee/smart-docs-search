@@ -1,2 +1,0 @@
-// src/theme/index.js
-export { default as SearchBar } from './SearchBar/Search';
