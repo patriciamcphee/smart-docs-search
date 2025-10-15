@@ -1,6 +1,6 @@
 {
   "name": "smart-search-plugin",
-  "version": "3.0.5",
+  "version": "3.0.7",
   "description": "Smart fuzzy search plugin for Docusaurus 3.x with real-time results and section-level search",
   "keywords": [
     "docusaurus",
@@ -10,13 +10,13 @@
     "local-search",
     "documentation"
   ],
-  "homepage": "https://github.com/patriciamcphee/smart-search-plugin",
+  "homepage": "https://github.com/patriciamcphee/smart-docs-search",
   "bugs": {
-    "url": "https://github.com/patriciamcphee/smart-search-plugin/issues"
+    "url": "https://github.com/patriciamcphee/smart-docs-search/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/patriciamcphee/smart-search-plugin.git"
+    "url": "https://github.com/patriciamcphee/smart-docs-search.git"
   },
   "license": "MIT",
   "author": {
