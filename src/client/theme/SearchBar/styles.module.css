@@ -25,7 +25,7 @@
 /* Search Tooltip styling */
 .searchTooltip {
   max-width: 100px !important;
-  z-index: 1100 !important; /* Higher than dropdown's z-index of 1000 */
+  z-index: 1100 !important;
 }
 
 .searchTooltip :global(.ant-tooltip-inner) {
@@ -38,18 +38,17 @@
   border-radius: 6px;
   border: none;
   box-shadow: none;
-  margin-top: 15px; /* Add margin to make room for arrow */
+  margin-top: 15px;
 }
 
 .searchTooltip :global(.ant-tooltip-arrow) {
   display: none;
 }
 
-/* Custom arrow for search tooltip */
 .searchTooltip :global(.ant-tooltip-inner)::before {
   content: "";
   position: absolute;
-  top: -10px; /* Adjust position to ensure visibility */
+  top: -10px;
   left: 45%;
   margin-left: 0px;
   border-width: 5px;
@@ -57,12 +56,11 @@
   border-color: transparent transparent hsla(0, 0%, 10%, 1) transparent;
 }
 
-/* Animation */
 .searchTooltip :global(.ant-tooltip) {
   opacity: 0;
   transition: opacity 0.2s ease-in-out;
-  padding-top: 10px; /* Add padding to create space for arrow */
-  z-index: 1100 !important; /* Ensure all tooltip parts stay above dropdown */
+  padding-top: 10px;
+  z-index: 1100 !important;
 }
 
 .searchTooltip :global(.ant-tooltip-open) {
@@ -126,12 +124,13 @@
   transform: scale(0.95);
 }
 
-/* Results dropdown styling */
+/* Results dropdown styling - FIXED FOR MOBILE */
 .dropdownResults {
   position: absolute;
   top: 100%;
   right: 0;
-  width: 400px;
+  width: min(400px, calc(100vw - 32px)); /* Responsive width */
+  max-width: 400px;
   max-height: 70vh;
   overflow-y: auto;
   background-color: var(--ifm-background-surface-color);
@@ -229,7 +228,7 @@
 
 /* Base highlight style - light mode */
 .highlighted {
-  background-color: yellow; /* Light yellow */
+  background-color: yellow;
   padding: 0 2px;
   border-radius: 2px;
   margin: 0 -2px;
@@ -237,41 +236,36 @@
 
 /* Hover state for highlights */
 .resultItem:hover .highlighted {
-  background-color: rgba(255, 246, 157, 0.4); /* Slightly more intense on hover */
+  background-color: rgba(255, 246, 157, 0.4);
 }
-
-
 
 /* Dark mode adjustments */
 [data-theme='dark'] .searchInput {
   background-color: var(--ifm-background-surface-color);
   color: var(--ifm-font-color-base);
-  border-color: var(--ifm-color-primary-darker); /* Use primary mint color for consistency */
+  border-color: var(--ifm-color-primary-darker);
 }
 
-/* Fix placeholder text for Ant Design Input - target the actual input element */
 [data-theme='dark'] .searchInput input::placeholder,
 [data-theme='dark'] .searchInput.ant-input::placeholder,
 [data-theme='dark'] .searchInput .ant-input::placeholder {
-  color: rgba(255, 255, 255, 0.45) !important; /* Visible light gray */
+  color: rgba(255, 255, 255, 0.45) !important;
   opacity: 1 !important;
 }
 
-/* Hover state for search input in dark mode */
 [data-theme='dark'] .searchInput:hover {
   border-color: var(--ifm-color-primary-dark);
 }
 
-/* Focus state with primary color glow in dark mode */
 [data-theme='dark'] .searchInput:focus {
   outline: none;
   border-color: var(--ifm-color-primary);
-  box-shadow: 0 0 0 2px rgba(62, 255, 192, 0.2); /* Mint glow effect matching primary color */
+  box-shadow: 0 0 0 2px rgba(62, 255, 192, 0.2);
 }
 
 [data-theme='dark'] .dropdownResults {
   background-color: var(--ifm-background-surface-color);
-  border-color: var(--ifm-color-primary-darker); /* Consistent border color */
+  border-color: var(--ifm-color-primary-darker);
 }
 
 [data-theme='dark'] .resultItem {
@@ -288,23 +282,26 @@
 }
 
 [data-theme='dark'] .clearButton {
-  color: var(--ifm-color-emphasis-600); /* More visible */
+  color: var(--ifm-color-emphasis-600);
 }
 
 [data-theme='dark'] .clearButton:hover {
-  color: var(--ifm-color-primary-light); /* Use primary color on hover */
+  color: var(--ifm-color-primary-light);
 }
 
-
-/* Mobile responsiveness */
+/* Mobile responsiveness - IMPROVED */
 @media (max-width: 768px) {
   .searchWrapper.expanded .searchInputWrapper {
     width: 200px;
   }
   
   .dropdownResults {
-    width: 300px;
-    right: -50px;
+    /* Remove fixed positioning that causes cutoff */
+    width: min(300px, calc(100vw - 32px));
+    /* Center align for better mobile experience */
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
   }
   
   .clearButton {
@@ -318,8 +315,10 @@
   }
   
   .dropdownResults {
-    width: 250px;
-    right: -70px;
+    width: min(280px, calc(100vw - 24px));
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
   }
   
   .resultTitle {
@@ -332,6 +331,10 @@
   
   .clearButton {
     font-size: 11px;
+  }
+  
+  .sectionResult {
+    padding-left: 24px;
   }
 }
 
