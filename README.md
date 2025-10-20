@@ -70,11 +70,8 @@ module.exports = {
 The plugin automatically:
 
 1. Indexes your docs at build time
-
 2. Creates a static search index
-
 3. Provides a SearchBar component
-
 4. Handles all search functionality
 
 ### Excluding Documents
@@ -93,9 +90,7 @@ search_exclude: true  # Also excludes
 ## Compatibility
 
 - Docusaurus 3.x
-
 - React 18+ or 19+
-
 - Node.js 18+
 
 ## Migration from v2
@@ -103,9 +98,7 @@ search_exclude: true  # Also excludes
 If migrating from Docusaurus 2.x version:
 
 1. Update Docusaurus to v3
-
 2. Install this package
-
 3. Update configuration as shown above
 
 ## License
@@ -115,4 +108,3 @@ MIT &copy; Patricia McPhee
 ## Contributing
 
 Issues and PRs welcome at [GitHub](https://github.com/patriciamcphee/smart-search-plugin)
-

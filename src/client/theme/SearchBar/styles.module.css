@@ -124,15 +124,15 @@
   transform: scale(0.95);
 }
 
-/* Results dropdown styling - FIXED FOR MOBILE */
+/* Results dropdown styling - Desktop */
 .dropdownResults {
   position: absolute;
   top: 100%;
   right: 0;
-  width: min(400px, calc(100vw - 32px)); /* Responsive width */
-  max-width: 400px;
+  width: 400px;
   max-height: 70vh;
   overflow-y: auto;
+  overflow-x: hidden; /* Prevent horizontal scroll */
   background-color: var(--ifm-background-surface-color);
   border: 1px solid var(--ifm-color-emphasis-300);
   border-radius: 8px;
@@ -147,6 +147,7 @@
   border-bottom: 1px solid var(--ifm-color-emphasis-300);
   font-size: 0.875rem;
   color: var(--ifm-color-emphasis-700);
+  word-wrap: break-word;
 }
 
 /* Base result item styling */
@@ -155,6 +156,8 @@
   cursor: pointer;
   border-bottom: 1px solid var(--ifm-color-emphasis-200);
   transition: background-color 0.2s ease;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .resultItem:focus {
@@ -178,6 +181,7 @@
   font-size: 1rem;
   font-weight: 600;
   margin-bottom: 4px;
+  word-wrap: break-word;
 }
 
 .resultDescription {
@@ -185,6 +189,7 @@
   color: var(--ifm-font-color-base);
   margin-bottom: 4px;
   line-height: 1.4;
+  word-wrap: break-word;
 }
 
 .resultMeta {
@@ -289,19 +294,23 @@
   color: var(--ifm-color-primary-light);
 }
 
-/* Mobile responsiveness - IMPROVED */
+/* MOBILE RESPONSIVENESS - CRITICAL FIXES */
+
+/* Tablet - 768px and below */
 @media (max-width: 768px) {
   .searchWrapper.expanded .searchInputWrapper {
     width: 200px;
   }
   
   .dropdownResults {
-    /* Remove fixed positioning that causes cutoff */
-    width: min(300px, calc(100vw - 32px));
-    /* Center align for better mobile experience */
-    right: auto;
-    left: 50%;
-    transform: translateX(-50%);
+    /* Switch to fixed positioning on mobile */
+    position: fixed !important;
+    top: 60px !important; /* Approximate navbar height */
+    right: 8px !important;
+    left: auto !important;
+    width: calc(100vw - 16px) !important;
+    max-width: 360px !important;
+    margin-top: 0 !important;
   }
   
   .clearButton {
@@ -309,16 +318,19 @@
   }
 }
 
+/* Mobile - 576px and below */
 @media (max-width: 576px) {
   .searchWrapper.expanded .searchInputWrapper {
     width: 150px;
   }
   
   .dropdownResults {
-    width: min(280px, calc(100vw - 24px));
-    left: 50%;
-    right: auto;
-    transform: translateX(-50%);
+    position: fixed !important;
+    top: 60px !important;
+    right: 4px !important;
+    left: 4px !important;
+    width: auto !important;
+    max-width: none !important;
   }
   
   .resultTitle {
@@ -335,6 +347,23 @@
   
   .sectionResult {
     padding-left: 24px;
+  }
+  
+  .resultItem {
+    padding: 10px 12px;
+  }
+}
+
+/* Extra small devices - 400px and below */
+@media (max-width: 400px) {
+  .dropdownResults {
+    right: 2px !important;
+    left: 2px !important;
+  }
+  
+  .resultCount {
+    padding: 6px 12px;
+    font-size: 0.8rem;
   }
 }
 

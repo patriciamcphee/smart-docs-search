@@ -4,17 +4,50 @@
  * This source code is licensed under the MIT license.
  */
 
-const path = require('path');
-const fs = require('fs-extra');
-const matter = require('gray-matter');
+// Strip code blocks from content
+function stripCodeBlocks(content) {
+  const lines = content.split('\n');
+  const cleanedLines = [];
+  let inCodeBlock = false;
+  
+  for (const line of lines) {
+    const trimmed = line.trim();
+    
+    // Check for code block delimiters (``` or ~~~)
+    if (trimmed.startsWith('```') || trimmed.startsWith('~~~')) {
+      inCodeBlock = !inCodeBlock;
+      continue;
+    }
+    
+    // Skip lines inside code blocks
+    if (!inCodeBlock) {
+      cleanedLines.push(line);
+    }
+  }
+  
+  return cleanedLines.join('\n');
+}
 
 // Simple heading extraction without heavy dependencies
 function extractHeadingsWithContent(content) {
   const sections = [];
   const lines = content.split('\n');
+  let inCodeBlock = false;
   
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
+    
+    // Check for code block delimiters (``` or ~~~)
+    if (line.startsWith('```') || line.startsWith('~~~')) {
+      inCodeBlock = !inCodeBlock;
+      continue;
+    }
+    
+    // Skip heading extraction if we're inside a code block
+    if (inCodeBlock) {
+      continue;
+    }
+    
     const headingMatch = line.match(/^(#{1,6})\s+(.+)/);
     
     if (headingMatch) {
@@ -53,12 +86,17 @@ module.exports = function smartSearchPlugin(context, options = {}) {
     name: 'smart-search-plugin',
     
     async loadContent() {
+      // Import Node.js modules only in server-side function
+      const path = require('path');
+      const fs = require('fs-extra');
+      const matter = require('gray-matter');
+      
       console.log('[Smart Search]: Starting content indexing');
       const docsDir = path.join(context.siteDir, 'docs');
       
       if (!fs.existsSync(docsDir)) {
         console.warn('[Smart Search]: Docs directory not found:', docsDir);
-        return [];
+        return { searchIndex: [], searchWeights };
       }
 
       const searchIndex = [];
@@ -128,7 +166,7 @@ module.exports = function smartSearchPlugin(context, options = {}) {
                   keywords: Array.isArray(frontMatter.keywords) ? frontMatter.keywords : [],
                   last_update: frontMatter.last_update || null,
                   url,
-                  content: content.slice(0, 300),
+                  content: stripCodeBlocks(content).slice(0, 300),
                   sections: sections.map(section => ({
                     ...section,
                     url: `${url}#${section.id}`
@@ -162,6 +200,10 @@ module.exports = function smartSearchPlugin(context, options = {}) {
     },
 
     async contentLoaded({content, actions}) {
+      // Import Node.js modules only in server-side function
+      const path = require('path');
+      const fs = require('fs-extra');
+      
       const {createData, setGlobalData} = actions;
       
       try {
@@ -197,17 +239,30 @@ module.exports = function smartSearchPlugin(context, options = {}) {
       }
     },
 
-    configureWebpack(config, isServer) {
+    configureWebpack(config, isServer, utils) {
+      const path = require('path');
+      
       return {
         resolve: {
           alias: {
             '@theme/SearchBar': path.resolve(__dirname, './client/theme/SearchBar'),
+          },
+          fallback: isServer ? {} : {
+            fs: false,
+            path: false,
+            constants: false,
+            stream: false,
+            util: false,
+            assert: false,
+            buffer: false,
+            process: false,
           },
         },
       };
     },
 
     getThemePath() {
+      const path = require('path');
       return path.resolve(__dirname, './client/theme');
     },
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 /**
- * Simple build script to copy files from src to lib
- * This avoids complex build tooling while maintaining package structure
+ * Build script that copies files from src to lib
+ * Excludes node_modules and other unnecessary files
  */
 
 const fs = require('fs-extra');
@@ -17,8 +17,20 @@ async function build() {
   // Clean lib directory
   await fs.remove(libDir);
   
-  // Copy all files from src to lib
-  await fs.copy(srcDir, libDir);
+  // Copy files from src to lib, excluding node_modules
+  await fs.copy(srcDir, libDir, {
+    filter: (src) => {
+      // Exclude node_modules
+      if (src.includes('node_modules')) {
+        return false;
+      }
+      // Exclude package-lock.json and yarn.lock
+      if (src.endsWith('package-lock.json') || src.endsWith('yarn.lock')) {
+        return false;
+      }
+      return true;
+    }
+  });
   
   console.log('Build complete!');
 }
