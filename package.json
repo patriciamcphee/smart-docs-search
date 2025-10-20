@@ -1,6 +1,6 @@
 {
   "name": "smart-search-plugin",
-  "version": "3.0.7",
+  "version": "3.1.0",
   "description": "Smart fuzzy search plugin for Docusaurus 3.x with real-time results and section-level search",
   "keywords": [
     "docusaurus",
